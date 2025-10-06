@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>完成任务，免费领取 30 天 - PiExplorer</title>
+    <link rel="icon" href="/favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="/" class="flex items-center">
+                    <img src="/favicon.png" alt="PiExplorer" class="h-8 w-8 mr-2">
+                    <span class="text-xl font-bold text-gray-800">PiExplorer</span>
+                </a>
+                <div class="flex items-center space-x-4">
+                    <a href="/monitor/" class="text-gray-600 hover:text-gray-900">返回首页</a>
+                    <a href="/auth/login.html" class="text-gray-600 hover:text-gray-900">登录</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="gradient-bg text-white py-12">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h1 class="text-4xl font-bold mb-4">🎁 完成任务，免费领取 30 天社交版</h1>
+            <p class="text-xl opacity-90">只需 3 个简单步骤，即可解锁更多功能</p>
+        </div>
+    </div>
+
+    <!-- 任务列表 -->
+    <div class="max-w-4xl mx-auto px-4 py-12">
+        <!-- 提示 -->
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700">
+                        请先 <a href="/auth/register.html" class="font-semibold underline">注册账户</a> 或 <a href="/auth/login.html" class="font-semibold underline">登录</a>，然后完成以下任务
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务进度 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold">任务进度</h2>
+                <span class="text-gray-600">0/3 已完成</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div class="bg-purple-600 h-3 rounded-full" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- 任务 1 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-2xl">
+                        ☐
+                    </div>
+                </div>
+                <div class="ml-4 flex-1">
+                    <h3 class="text-xl font-semibold mb-2">任务 1：关注 Twitter @PiExplorer</h3>
+                    <p class="text-gray-600 mb-4">关注我们的 Twitter 账号，获取最新的 Pi Network 资讯</p>
+                    <div class="flex space-x-4">
+                        <a href="https://twitter.com/PiExplorer" target="_blank" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition">
+                            前往关注
+                        </a>
+                        <button class="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition" disabled>
+                            我已完成
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务 2 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-2xl">
+                        ☐
+                    </div>
+                </div>
+                <div class="ml-4 flex-1">
+                    <h3 class="text-xl font-semibold mb-2">任务 2：加入 Telegram 群组</h3>
+                    <p class="text-gray-600 mb-4">加入我们的 Telegram 社区，与其他 Pi 用户交流</p>
+                    <div class="flex space-x-4">
+                        <a href="https://t.me/piexplorer" target="_blank" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition">
+                            加入群组
+                        </a>
+                        <button class="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition" disabled>
+                            我已完成
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务 3 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-2xl">
+                        ☐
+                    </div>
+                </div>
+                <div class="ml-4 flex-1">
+                    <h3 class="text-xl font-semibold mb-2">任务 3：转发指定推文</h3>
+                    <p class="text-gray-600 mb-4">转发我们的推文并 @3 位好友</p>
+                    <div class="flex space-x-4">
+                        <a href="https://twitter.com/PiExplorer" target="_blank" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition">
+                            查看推文
+                        </a>
+                        <button class="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition" disabled>
+                            我已完成
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 奖励说明 -->
+        <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 mb-8">
+            <h3 class="text-xl font-semibold mb-4">🎁 完成所有任务后，您将获得：</h3>
+            <ul class="space-y-2">
+                <li class="flex items-start">
+                    <svg class="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span>3 个监控地址（原 1 个）</span>
+                </li>
+                <li class="flex items-start">
+                    <svg class="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span>自定义阈值功能</span>
+                </li>
+                <li class="flex items-start">
+                    <svg class="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span>30 天有效期</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- 验证按钮 -->
+        <div class="text-center">
+            <button class="gradient-bg text-white px-8 py-3 rounded-lg font-semibold opacity-50 cursor-not-allowed" disabled>
+                验证并领取（请先完成所有任务）
+            </button>
+            <p class="mt-4 text-gray-600">
+                功能开发中，敬请期待...
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>&copy; 2024 PiExplorer. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
+

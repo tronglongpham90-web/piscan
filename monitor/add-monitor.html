@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加监控 - PiExplorer</title>
+    <link rel="icon" href="/favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+        .step-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .radio-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .radio-card:hover {
+            border-color: #667eea;
+            background-color: #f9fafb;
+        }
+        .radio-card.selected {
+            border-color: #667eea;
+            background-color: #ede9fe;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="/monitor/dashboard.html" class="flex items-center text-gray-600 hover:text-gray-900">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        返回监控中心
+                    </a>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span id="user-email" class="text-gray-600 text-sm"></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- 页面标题 -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">添加新的监控地址</h1>
+            <p class="text-gray-600">设置您的 Pi 钱包监控，实时追踪余额变化</p>
+        </div>
+
+        <!-- 表单 -->
+        <form id="add-monitor-form">
+            <!-- 步骤 1: 输入钱包地址 -->
+            <div class="step-card">
+                <div class="flex items-start mb-4">
+                    <div class="step-number">1</div>
+                    <div class="flex-1">
+                        <h2 class="text-xl font-bold text-gray-800 mb-2">输入钱包地址</h2>
+                        <p class="text-gray-600 text-sm mb-4">请输入您要监控的 Pi Network 钱包地址</p>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Pi 钱包地址 *</label>
+                            <input 
+                                type="text" 
+                                id="wallet-address" 
+                                name="wallet-address"
+                                class="input-field" 
+                                placeholder="例如: GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                                required
+                            >
+                            <p class="text-xs text-gray-500 mt-2">💡 提示: Pi 钱包地址通常以 G 开头，长度为 56 个字符</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">监控名称（可选）</label>
+                            <input 
+                                type="text" 
+                                id="monitor-name" 
+                                name="monitor-name"
+                                class="input-field" 
+                                placeholder="例如: 我的主钱包"
+                            >
+                            <p class="text-xs text-gray-500 mt-2">给这个监控起个名字，方便识别</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步骤 2: 设置监控选项 -->
+            <div class="step-card">
+                <div class="flex items-start mb-4">
+                    <div class="step-number">2</div>
+                    <div class="flex-1">
+                        <h2 class="text-xl font-bold text-gray-800 mb-2">设置监控选项</h2>
+                        <p class="text-gray-600 text-sm mb-4">配置检查频率和通知条件</p>
+                        
+                        <!-- 检查频率 -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">检查频率 *</label>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="radio-card" data-frequency="hourly">
+                                    <input type="radio" name="frequency" value="hourly" id="freq-hourly" class="hidden">
+                                    <label for="freq-hourly" class="cursor-pointer">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <div class="font-semibold text-gray-800">每小时</div>
+                                                <div class="text-xs text-gray-500 mt-1">实时监控</div>
+                                            </div>
+                                            <div class="text-2xl">⚡</div>
+                                        </div>
+                                        <div class="mt-2 text-xs text-purple-600 font-semibold">需要付费版</div>
+                                    </label>
+                                </div>
+                                
+                                <div class="radio-card selected" data-frequency="daily">
+                                    <input type="radio" name="frequency" value="daily" id="freq-daily" class="hidden" checked>
+                                    <label for="freq-daily" class="cursor-pointer">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <div class="font-semibold text-gray-800">每天</div>
+                                                <div class="text-xs text-gray-500 mt-1">每日检查</div>
+                                            </div>
+                                            <div class="text-2xl">📅</div>
+                                        </div>
+                                        <div class="mt-2 text-xs text-green-600 font-semibold">✓ 免费可用</div>
+                                    </label>
+                                </div>
+                                
+                                <div class="radio-card" data-frequency="weekly">
+                                    <input type="radio" name="frequency" value="weekly" id="freq-weekly" class="hidden">
+                                    <label for="freq-weekly" class="cursor-pointer">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <div class="font-semibold text-gray-800">每周</div>
+                                                <div class="text-xs text-gray-500 mt-1">每周检查</div>
+                                            </div>
+                                            <div class="text-2xl">📆</div>
+                                        </div>
+                                        <div class="mt-2 text-xs text-green-600 font-semibold">✓ 免费可用</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 通知阈值 -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">通知阈值（高级功能）</label>
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-start mb-3">
+                                    <input type="checkbox" id="threshold-increase" class="mt-1 mr-3" disabled>
+                                    <div class="flex-1">
+                                        <label for="threshold-increase" class="text-sm text-gray-700">余额增加超过</label>
+                                        <div class="flex items-center mt-2">
+                                            <input type="number" id="threshold-increase-value" class="input-field w-32 mr-2" placeholder="100" disabled>
+                                            <span class="text-gray-600">π 时通知</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start mb-3">
+                                    <input type="checkbox" id="threshold-decrease" class="mt-1 mr-3" disabled>
+                                    <div class="flex-1">
+                                        <label for="threshold-decrease" class="text-sm text-gray-700">余额减少超过</label>
+                                        <div class="flex items-center mt-2">
+                                            <input type="number" id="threshold-decrease-value" class="input-field w-32 mr-2" placeholder="50" disabled>
+                                            <span class="text-gray-600">π 时通知</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start">
+                                    <input type="checkbox" id="notify-all" class="mt-1 mr-3" checked>
+                                    <label for="notify-all" class="text-sm text-gray-700">任何余额变化都通知我</label>
+                                </div>
+                                
+                                <div class="mt-3 text-xs text-yellow-600 bg-yellow-50 p-2 rounded">
+                                    💎 自定义阈值需要完成社交任务或升级会员
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步骤 3: 通知方式 -->
+            <div class="step-card">
+                <div class="flex items-start mb-4">
+                    <div class="step-number">3</div>
+                    <div class="flex-1">
+                        <h2 class="text-xl font-bold text-gray-800 mb-2">通知方式</h2>
+                        <p class="text-gray-600 text-sm mb-4">选择接收通知的方式</p>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center p-4 border border-gray-200 rounded-lg">
+                                <input type="checkbox" id="notify-email" class="mr-3" checked disabled>
+                                <div class="flex-1">
+                                    <label for="notify-email" class="font-semibold text-gray-800">📧 邮件通知</label>
+                                    <p class="text-xs text-gray-500 mt-1">发送到您的注册邮箱</p>
+                                </div>
+                                <span class="text-xs text-green-600 font-semibold">✓ 已启用</span>
+                            </div>
+                            
+                            <div class="flex items-center p-4 border border-gray-200 rounded-lg bg-gray-50">
+                                <input type="checkbox" id="notify-wechat" class="mr-3" disabled>
+                                <div class="flex-1">
+                                    <label for="notify-wechat" class="font-semibold text-gray-400">💬 微信通知</label>
+                                    <p class="text-xs text-gray-400 mt-1">即将推出</p>
+                                </div>
+                                <span class="text-xs text-gray-400">敬请期待</span>
+                            </div>
+                            
+                            <div class="flex items-center p-4 border border-gray-200 rounded-lg bg-gray-50">
+                                <input type="checkbox" id="notify-telegram" class="mr-3" disabled>
+                                <div class="flex-1">
+                                    <label for="notify-telegram" class="font-semibold text-gray-400">✈️ Telegram 通知</label>
+                                    <p class="text-xs text-gray-400 mt-1">即将推出</p>
+                                </div>
+                                <span class="text-xs text-gray-400">敬请期待</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 提交按钮 -->
+            <div class="flex items-center justify-between mt-8">
+                <a href="/monitor/dashboard.html" class="text-gray-600 hover:text-gray-900">
+                    取消
+                </a>
+                <button 
+                    type="submit" 
+                    id="submit-btn"
+                    class="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition flex items-center"
+                >
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    添加监控
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://api.piexplorer.online';
+        
+        // 检查登录状态
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const userEmail = localStorage.getItem('userEmail');
+            
+            if (!token || !userEmail) {
+                window.location.href = '/auth/login.html';
+                return false;
+            }
+            
+            document.getElementById('user-email').textContent = userEmail;
+            return true;
+        }
+
+        // 频率选择交互
+        document.querySelectorAll('.radio-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const radio = this.querySelector('input[type="radio"]');
+                if (!radio.disabled) {
+                    document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    radio.checked = true;
+                }
+            });
+        });
+
+        // 表单提交
+        document.getElementById('add-monitor-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submit-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 添加中...';
+            
+            const formData = {
+                walletAddress: document.getElementById('wallet-address').value,
+                monitorName: document.getElementById('monitor-name').value,
+                frequency: document.querySelector('input[name="frequency"]:checked').value,
+                notifyAll: document.getElementById('notify-all').checked
+            };
+            
+            try {
+                // TODO: 调用后端 API 添加监控
+                console.log('添加监控:', formData);
+                
+                // 模拟 API 调用
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                alert('监控添加成功！');
+                window.location.href = '/monitor/dashboard.html';
+            } catch (error) {
+                alert('添加失败: ' + error.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+
+        // 页面加载
+        checkAuth();
+    </script>
+</body>
+</html>
+

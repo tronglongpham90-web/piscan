@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>监控中心 - PiExplorer</title>
+    <link rel="icon" href="/favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background-color: #f3f4f6;
+            padding-left: 1.5rem;
+        }
+        .sidebar-link.active {
+            background-color: #667eea;
+            color: white;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center">
+                        <img src="/favicon.png" alt="PiExplorer" class="h-8 w-8 mr-2">
+                        <span class="text-xl font-bold text-gray-800">PiExplorer</span>
+                    </a>
+                    <span class="ml-4 text-gray-400">|</span>
+                    <span class="ml-4 text-gray-600 font-semibold">监控中心</span>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button id="notification-btn" class="relative p-2 text-gray-600 hover:text-gray-900">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                        <span id="notification-badge" class="hidden absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <span id="user-email" class="text-gray-600 text-sm"></span>
+                        <button id="logout-btn" class="text-red-500 hover:text-red-600 text-sm">退出</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-screen">
+        <!-- 侧边栏 -->
+        <aside class="w-64 bg-white shadow-lg hidden md:block">
+            <div class="p-6">
+                <nav class="space-y-2">
+                    <a href="/monitor/dashboard.html" class="sidebar-link active flex items-center px-4 py-3 rounded-lg">
+                        <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <span>仪表板</span>
+                    </a>
+                    <a href="/monitor/add-monitor.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-600">
+                        <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        <span>添加监控</span>
+                    </a>
+                    <a href="/monitor/notifications.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-600">
+                        <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                        <span>通知历史</span>
+                    </a>
+                    <a href="/monitor/referral.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-600">
+                        <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <span>推荐返现</span>
+                    </a>
+                    <a href="/monitor/settings.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-600">
+                        <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span>账户设置</span>
+                    </a>
+                    <div class="pt-4 mt-4 border-t">
+                        <a href="/monitor/social-tasks.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-yellow-600 bg-yellow-50">
+                            <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+                            </svg>
+                            <span>社交任务</span>
+                        </a>
+                        <a href="/monitor/" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-purple-600 bg-purple-50 mt-2">
+                            <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            <span>升级会员</span>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main class="flex-1 overflow-y-auto p-6">
+            <!-- 欢迎信息 -->
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">欢迎回来！</h1>
+                <p class="text-gray-600">这是您的监控中心概览</p>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <!-- 监控总数 -->
+                <div class="stat-card card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">监控地址</p>
+                            <p class="text-3xl font-bold text-gray-800 mt-2"><span id="monitor-count">0</span>/<span id="monitor-limit">1</span></p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <span class="text-xs text-gray-500">会员类型: <span id="member-type" class="font-semibold">免费版</span></span>
+                    </div>
+                </div>
+
+                <!-- 今日通知 -->
+                <div class="stat-card card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">今日通知</p>
+                            <p class="text-3xl font-bold text-gray-800 mt-2" id="today-notifications">0</p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <span class="text-xs text-green-600">↑ 比昨天多 2 条</span>
+                    </div>
+                </div>
+
+                <!-- 总余额变化 -->
+                <div class="stat-card card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">总余额变化</p>
+                            <p class="text-3xl font-bold text-gray-800 mt-2" id="total-balance-change">+0 π</p>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-full">
+                            <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <span class="text-xs text-gray-500">最近 7 天</span>
+                    </div>
+                </div>
+
+                <!-- 会员状态 -->
+                <div class="stat-card card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">会员状态</p>
+                            <p class="text-xl font-bold text-gray-800 mt-2" id="membership-status">免费版</p>
+                        </div>
+                        <div class="bg-yellow-100 p-3 rounded-full">
+                            <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="/monitor/" class="text-xs text-purple-600 hover:text-purple-700 font-semibold">升级会员 →</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 快速操作 -->
+            <div class="mb-6 flex items-center justify-between">
+                <h2 class="text-xl font-bold text-gray-800">我的监控</h2>
+                <a href="/monitor/add-monitor.html" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition flex items-center">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    添加监控
+                </a>
+            </div>
+
+            <!-- 监控列表 -->
+            <div id="monitor-list" class="bg-white rounded-xl shadow-md overflow-hidden">
+                <!-- 加载状态 -->
+                <div id="loading-state" class="p-8 text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+                    <p class="text-gray-600 mt-4">加载中...</p>
+                </div>
+
+                <!-- 空状态 -->
+                <div id="empty-state" class="hidden p-12 text-center">
+                    <svg class="h-24 w-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                    </svg>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">还没有监控地址</h3>
+                    <p class="text-gray-600 mb-6">添加您的第一个 Pi 钱包地址开始监控</p>
+                    <a href="/monitor/add-monitor.html" class="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition">
+                        立即添加
+                    </a>
+                </div>
+
+                <!-- 监控列表表格 -->
+                <div id="monitor-table" class="hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">钱包地址</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">当前余额</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最后检查</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monitor-tbody" class="bg-white divide-y divide-gray-200">
+                            <!-- 动态填充 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 最近通知 -->
+            <div class="mt-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">最近通知</h2>
+                <div id="recent-notifications" class="bg-white rounded-xl shadow-md p-6">
+                    <div class="text-center text-gray-500 py-8">
+                        暂无通知
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://api.piexplorer.online';
+        
+        // 检查登录状态
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const userEmail = localStorage.getItem('userEmail');
+            
+            if (!token || !userEmail) {
+                window.location.href = '/auth/login.html';
+                return false;
+            }
+            
+            document.getElementById('user-email').textContent = userEmail;
+            return true;
+        }
+
+        // 退出登录
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = '/auth/login.html';
+        });
+
+        // 加载监控列表
+        async function loadMonitors() {
+            try {
+                // TODO: 调用后端 API 获取监控列表
+                // const response = await fetch(`${API_BASE_URL}/api/monitors`, {
+                //     headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                // });
+                // const data = await response.json();
+
+                // 模拟数据
+                const mockData = {
+                    monitors: [
+                        {
+                            id: 1,
+                            walletAddress: 'GBQWERTY1234567890ASDFGHJKLZXCVBNMQWERTYUIOPASDFGH',
+                            monitorName: '我的主钱包',
+                            currentBalance: '1,234.56',
+                            lastChecked: '2025-10-06 14:30',
+                            status: 'active',
+                            balanceChange: '+100'
+                        },
+                        {
+                            id: 2,
+                            walletAddress: 'GCZXCVBN0987654321QWERTYUIOPASDFGHJKLMNBVCXZAQWER',
+                            monitorName: '备用钱包',
+                            currentBalance: '567.89',
+                            lastChecked: '2025-10-06 14:25',
+                            status: 'active',
+                            balanceChange: '-50'
+                        }
+                    ],
+                    stats: {
+                        monitorCount: 2,
+                        monitorLimit: 3,
+                        todayNotifications: 5,
+                        totalBalanceChange: '+50',
+                        memberType: '社交任务版',
+                        membershipStatus: '有效期至 2025-11-05'
+                    }
+                };
+
+                setTimeout(() => {
+                    document.getElementById('loading-state').classList.add('hidden');
+
+                    if (mockData.monitors.length === 0) {
+                        document.getElementById('empty-state').classList.remove('hidden');
+                    } else {
+                        document.getElementById('monitor-table').classList.remove('hidden');
+                        renderMonitors(mockData.monitors);
+                        updateStats(mockData.stats);
+                    }
+                }, 1000);
+            } catch (error) {
+                console.error('加载监控列表失败:', error);
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('empty-state').classList.remove('hidden');
+            }
+        }
+
+        // 渲染监控列表
+        function renderMonitors(monitors) {
+            const tbody = document.getElementById('monitor-tbody');
+            tbody.innerHTML = '';
+
+            monitors.forEach(monitor => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+
+                const shortAddress = monitor.walletAddress.substring(0, 8) + '...' + monitor.walletAddress.substring(monitor.walletAddress.length - 8);
+                const balanceChangeClass = monitor.balanceChange.startsWith('+') ? 'text-green-600' : 'text-red-600';
+                const statusBadge = monitor.status === 'active'
+                    ? '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">✓ 正常</span>'
+                    : '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">已暂停</span>';
+
+                row.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div>
+                            <div class="font-medium text-gray-900">${monitor.monitorName || '未命名'}</div>
+                            <div class="text-sm text-gray-500" title="${monitor.walletAddress}">${shortAddress}</div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-gray-900">${monitor.currentBalance} π</div>
+                        <div class="text-sm ${balanceChangeClass}">${monitor.balanceChange} π</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500">
+                        ${monitor.lastChecked}
+                    </td>
+                    <td class="px-6 py-4">
+                        ${statusBadge}
+                    </td>
+                    <td class="px-6 py-4 text-sm">
+                        <div class="flex items-center space-x-2">
+                            <button onclick="viewMonitor(${monitor.id})" class="text-purple-600 hover:text-purple-700 font-semibold">查看</button>
+                            <span class="text-gray-300">|</span>
+                            <button onclick="editMonitor(${monitor.id})" class="text-blue-600 hover:text-blue-700 font-semibold">编辑</button>
+                            <span class="text-gray-300">|</span>
+                            <button onclick="deleteMonitor(${monitor.id})" class="text-red-600 hover:text-red-700 font-semibold">删除</button>
+                        </div>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
+        // 更新统计数据
+        function updateStats(stats) {
+            document.getElementById('monitor-count').textContent = stats.monitorCount;
+            document.getElementById('monitor-limit').textContent = stats.monitorLimit;
+            document.getElementById('today-notifications').textContent = stats.todayNotifications;
+            document.getElementById('total-balance-change').textContent = stats.totalBalanceChange + ' π';
+            document.getElementById('member-type').textContent = stats.memberType;
+            document.getElementById('membership-status').textContent = stats.membershipStatus;
+        }
+
+        // 查看监控详情
+        function viewMonitor(id) {
+            window.location.href = `/monitor/monitor-detail.html?id=${id}`;
+        }
+
+        // 编辑监控
+        function editMonitor(id) {
+            alert('编辑功能开发中...');
+        }
+
+        // 删除监控
+        function deleteMonitor(id) {
+            if (confirm('确定要删除这个监控吗？')) {
+                alert('删除功能开发中...');
+            }
+        }
+
+        // 页面加载
+        if (checkAuth()) {
+            loadMonitors();
+        }
+    </script>
+</body>
+</html>
+

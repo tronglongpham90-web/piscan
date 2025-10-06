@@ -202,9 +202,11 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // 保存 Token 到 localStorage
+                    // 保存 Token 和用户信息到 localStorage
                     localStorage.setItem('token', data.data.token);
                     localStorage.setItem('user', JSON.stringify(data.data.user));
+                    localStorage.setItem('userEmail', data.data.user.email);
+                    localStorage.setItem('userId', data.data.user.id);
 
                     // 显示成功消息
                     alert('注册成功！欢迎加入 PiExplorer 🎉\n\n我们已向您的邮箱发送了欢迎邮件。');

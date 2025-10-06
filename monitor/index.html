@@ -54,9 +54,17 @@
                 </div>
                 
                 <!-- 用户菜单 -->
-                <div class="flex items-center space-x-4">
-                    <a href="/auth/login.html" class="text-gray-600 hover:text-gray-900">登录</a>
-                    <a href="/auth/register.html" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">注册</a>
+                <div id="user-menu" class="flex items-center space-x-4">
+                    <!-- 未登录状态 -->
+                    <div id="guest-menu" class="flex items-center space-x-4">
+                        <a href="/auth/login.html" class="text-gray-600 hover:text-gray-900">登录</a>
+                        <a href="/auth/register.html" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">注册</a>
+                    </div>
+                    <!-- 已登录状态 -->
+                    <div id="logged-in-menu" class="hidden flex items-center space-x-4">
+                        <span id="user-email" class="text-gray-600"></span>
+                        <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">退出</button>
+                    </div>
                 </div>
                 
                 <!-- 移动端菜单按钮 -->
@@ -306,6 +314,37 @@
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('hidden');
         });
+
+        // 检查登录状态
+        function checkLoginStatus() {
+            const token = localStorage.getItem('token');
+            const userEmail = localStorage.getItem('userEmail');
+
+            if (token && userEmail) {
+                // 已登录，显示用户信息
+                document.getElementById('guest-menu').classList.add('hidden');
+                document.getElementById('logged-in-menu').classList.remove('hidden');
+                document.getElementById('user-email').textContent = userEmail;
+            } else {
+                // 未登录，显示登录/注册按钮
+                document.getElementById('guest-menu').classList.remove('hidden');
+                document.getElementById('logged-in-menu').classList.add('hidden');
+            }
+        }
+
+        // 退出登录
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userId');
+                alert('已退出登录');
+                location.reload();
+            }
+        });
+
+        // 页面加载时检查登录状态
+        checkLoginStatus();
     </script>
 </body>
 </html>

@@ -148,9 +148,11 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // 保存 Token 到 localStorage
+                    // 保存 Token 和用户信息到 localStorage
                     localStorage.setItem('token', data.data.token);
                     localStorage.setItem('user', JSON.stringify(data.data.user));
+                    localStorage.setItem('userEmail', data.data.user.email);
+                    localStorage.setItem('userId', data.data.user.id);
 
                     // 如果选择记住我，也保存到 sessionStorage
                     if (remember) {

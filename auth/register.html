@@ -147,31 +147,83 @@
     </div>
 
     <script>
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            // 验证密码
-            if (password !== confirmPassword) {
-                alert('两次输入的密码不一致，请重新输入');
-                return;
-            }
-            
-            // TODO: 实现注册逻辑
-            alert('注册功能开发中...\n\n第 2 步将实现完整的认证系统');
-            
-            // 临时：跳转到登录页
-            // window.location.href = '/auth/login.html';
-        });
-        
+        // API 基础 URL
+        const API_BASE_URL = 'https://piexplorer-proxy.vercel.app';
+
         // 从 URL 获取推荐码
         const urlParams = new URLSearchParams(window.location.search);
         const refCode = urlParams.get('ref');
         if (refCode) {
             document.getElementById('referralCode').value = refCode;
         }
+
+        // 注册表单提交
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const referralCode = document.getElementById('referralCode').value.trim();
+            const agree = document.getElementById('agree').checked;
+
+            // 验证密码
+            if (password !== confirmPassword) {
+                alert('两次输入的密码不一致，请重新输入');
+                return;
+            }
+
+            // 验证同意条款
+            if (!agree) {
+                alert('请同意服务条款和隐私政策');
+                return;
+            }
+
+            // 禁用提交按钮
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '注册中...';
+
+            try {
+                // 调用注册 API
+                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        referralCode: referralCode || undefined
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // 保存 Token 到 localStorage
+                    localStorage.setItem('token', data.data.token);
+                    localStorage.setItem('user', JSON.stringify(data.data.user));
+
+                    // 显示成功消息
+                    alert('注册成功！欢迎加入 PiExplorer 🎉\n\n我们已向您的邮箱发送了欢迎邮件。');
+
+                    // 跳转到监控页面
+                    window.location.href = '/monitor/dashboard.html';
+                } else {
+                    // 显示错误消息
+                    alert('注册失败：' + data.message);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('注册失败，请检查网络连接后重试');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
     </script>
 </body>
 </html>

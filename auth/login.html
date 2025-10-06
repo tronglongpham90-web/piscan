@@ -115,14 +115,65 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // API 基础 URL
+        const API_BASE_URL = 'https://piexplorer-proxy.vercel.app';
+
+        // 登录表单提交
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            // TODO: 实现登录逻辑
-            alert('登录功能开发中...\n\n第 2 步将实现完整的认证系统');
-            
-            // 临时：跳转到监控列表页
-            // window.location.href = '/monitor/dashboard.html';
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
+
+            // 禁用提交按钮
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '登录中...';
+
+            try {
+                // 调用登录 API
+                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // 保存 Token 到 localStorage
+                    localStorage.setItem('token', data.data.token);
+                    localStorage.setItem('user', JSON.stringify(data.data.user));
+
+                    // 如果选择记住我，也保存到 sessionStorage
+                    if (remember) {
+                        sessionStorage.setItem('rememberMe', 'true');
+                    }
+
+                    // 显示成功消息
+                    alert('登录成功！欢迎回来 🎉');
+
+                    // 跳转到监控页面
+                    window.location.href = '/monitor/dashboard.html';
+                } else {
+                    // 显示错误消息
+                    alert('登录失败：' + data.message);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('登录失败，请检查网络连接后重试');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
         });
     </script>
 </body>

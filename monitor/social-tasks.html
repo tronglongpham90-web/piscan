@@ -67,10 +67,10 @@
         </div>
 
         <!-- 任务 1 -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6" id="task-1">
             <div class="flex items-start">
                 <div class="flex-shrink-0">
-                    <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-2xl">
+                    <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-2xl task-icon">
                         ☐
                     </div>
                 </div>
@@ -81,7 +81,7 @@
                         <a href="https://twitter.com/PiexplorerGm" target="_blank" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition">
                             前往关注
                         </a>
-                        <button class="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition" disabled>
+                        <button class="task-complete-btn border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition" data-task="twitter">
                             我已完成
                         </button>
                     </div>
@@ -90,10 +90,10 @@
         </div>
 
         <!-- 任务 2 -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6" id="task-2">
             <div class="flex items-start">
                 <div class="flex-shrink-0">
-                    <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-2xl">
+                    <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-2xl task-icon">
                         ☐
                     </div>
                 </div>
@@ -104,7 +104,7 @@
                         <a href="https://t.me/+GUhbJmYybCRjYmZl" target="_blank" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition">
                             加入群组
                         </a>
-                        <button class="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition" disabled>
+                        <button class="task-complete-btn border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition" data-task="telegram">
                             我已完成
                         </button>
                     </div>
@@ -113,10 +113,10 @@
         </div>
 
         <!-- 任务 3 -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6" id="task-3">
             <div class="flex items-start">
                 <div class="flex-shrink-0">
-                    <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-2xl">
+                    <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-2xl task-icon">
                         ☐
                     </div>
                 </div>
@@ -127,7 +127,7 @@
                         <a href="https://twitter.com/PiexplorerGm" target="_blank" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition">
                             查看推文
                         </a>
-                        <button class="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition" disabled>
+                        <button class="task-complete-btn border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition" data-task="retweet">
                             我已完成
                         </button>
                     </div>
@@ -162,11 +162,11 @@
 
         <!-- 验证按钮 -->
         <div class="text-center">
-            <button class="gradient-bg text-white px-8 py-3 rounded-lg font-semibold opacity-50 cursor-not-allowed" disabled>
+            <button id="claim-btn" class="gradient-bg text-white px-8 py-3 rounded-lg font-semibold opacity-50 cursor-not-allowed" disabled>
                 验证并领取（请先完成所有任务）
             </button>
-            <p class="mt-4 text-gray-600">
-                功能开发中，敬请期待...
+            <p id="claim-message" class="mt-4 text-gray-600">
+                请完成上述所有任务后点击验证
             </p>
         </div>
     </div>
@@ -177,6 +177,177 @@
             <p>&copy; 2024 PiExplorer. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        // API 基础 URL
+        const API_BASE_URL = 'https://api.piexplorer.online';
+
+        // 任务状态管理
+        const taskStatus = {
+            twitter: false,
+            telegram: false,
+            retweet: false
+        };
+
+        // 页面加载时检查登录状态和任务状态
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginStatus();
+            loadTaskStatus();
+            initTaskButtons();
+            updateClaimButton();
+        });
+
+        // 检查登录状态
+        function checkLoginStatus() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('请先登录！');
+                window.location.href = '/auth/login.html';
+                return;
+            }
+        }
+
+        // 加载任务状态
+        function loadTaskStatus() {
+            const saved = localStorage.getItem('socialTaskStatus');
+            if (saved) {
+                const savedStatus = JSON.parse(saved);
+                Object.assign(taskStatus, savedStatus);
+                updateTaskUI();
+            }
+        }
+
+        // 保存任务状态
+        function saveTaskStatus() {
+            localStorage.setItem('socialTaskStatus', JSON.stringify(taskStatus));
+        }
+
+        // 初始化任务按钮
+        function initTaskButtons() {
+            const buttons = document.querySelectorAll('.task-complete-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const taskType = this.getAttribute('data-task');
+                    markTaskComplete(taskType, this);
+                });
+            });
+
+            // 验证并领取按钮
+            document.getElementById('claim-btn').addEventListener('click', claimReward);
+        }
+
+        // 标记任务完成
+        function markTaskComplete(taskType, button) {
+            if (taskStatus[taskType]) {
+                alert('您已经完成过这个任务了！');
+                return;
+            }
+
+            if (confirm('确认您已完成此任务？\n\n注意：虚假提交可能导致奖励被取消。')) {
+                taskStatus[taskType] = true;
+                saveTaskStatus();
+                updateTaskUI();
+                updateClaimButton();
+
+                // 显示成功提示
+                button.textContent = '✓ 已完成';
+                button.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                button.disabled = true;
+            }
+        }
+
+        // 更新任务 UI
+        function updateTaskUI() {
+            Object.keys(taskStatus).forEach((taskType, index) => {
+                if (taskStatus[taskType]) {
+                    const taskCard = document.getElementById(`task-${index + 1}`);
+                    const icon = taskCard.querySelector('.task-icon');
+                    const button = taskCard.querySelector('.task-complete-btn');
+
+                    icon.textContent = '✓';
+                    icon.classList.remove('bg-gray-200');
+                    icon.classList.add('bg-green-500', 'text-white');
+
+                    button.textContent = '✓ 已完成';
+                    button.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                    button.disabled = true;
+                }
+            });
+        }
+
+        // 更新领取按钮状态
+        function updateClaimButton() {
+            const allCompleted = Object.values(taskStatus).every(status => status === true);
+            const claimBtn = document.getElementById('claim-btn');
+            const claimMessage = document.getElementById('claim-message');
+
+            if (allCompleted) {
+                claimBtn.disabled = false;
+                claimBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                claimBtn.classList.add('hover:opacity-90', 'cursor-pointer');
+                claimBtn.textContent = '验证并领取奖励';
+                claimMessage.textContent = '恭喜！您已完成所有任务，点击按钮领取奖励';
+                claimMessage.classList.add('text-green-600', 'font-semibold');
+            }
+        }
+
+        // 领取奖励
+        async function claimReward() {
+            const token = localStorage.getItem('token');
+            const claimBtn = document.getElementById('claim-btn');
+            const claimMessage = document.getElementById('claim-message');
+
+            // 检查是否已领取
+            const claimed = localStorage.getItem('socialTaskClaimed');
+            if (claimed === 'true') {
+                alert('您已经领取过奖励了！');
+                return;
+            }
+
+            claimBtn.disabled = true;
+            claimBtn.textContent = '验证中...';
+            claimMessage.textContent = '正在验证您的任务完成情况，请稍候...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/social-tasks/claim`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        tasks: taskStatus
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    localStorage.setItem('socialTaskClaimed', 'true');
+                    claimBtn.textContent = '✓ 已领取';
+                    claimBtn.classList.add('bg-green-600');
+                    claimMessage.textContent = '🎉 恭喜！奖励已发放到您的账户';
+                    claimMessage.classList.add('text-green-600', 'font-bold');
+
+                    alert('🎉 恭喜！\n\n您已成功领取奖励：\n• 3 个监控地址\n• 自定义阈值功能\n• 30 天有效期\n\n请前往监控页面开始使用！');
+
+                    // 3秒后跳转到监控页面
+                    setTimeout(() => {
+                        window.location.href = '/monitor/';
+                    }, 3000);
+                } else {
+                    throw new Error(data.message || '领取失败');
+                }
+            } catch (error) {
+                console.error('领取奖励失败:', error);
+                claimBtn.disabled = false;
+                claimBtn.textContent = '验证并领取奖励';
+                claimMessage.textContent = '领取失败：' + error.message + '，请稍后重试';
+                claimMessage.classList.add('text-red-600');
+                alert('领取失败：' + error.message);
+            }
+        }
+    </script>
 </body>
 </html>
 

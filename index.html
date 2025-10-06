@@ -23,6 +23,68 @@ gtag('config','AW-16849325882');
 <body>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3256258816145387" crossorigin="anonymous"></script>
 <noscript>You need to enable JavaScript to run this app.</noscript>
+
+<!-- 监控功能入口 - 顶部横幅 -->
+<div id="monitor-banner" style="position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 20px; text-align: center; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div style="flex: 1; min-width: 200px;">
+            <span style="font-size: 18px; font-weight: bold;">🔔 新功能上线！</span>
+            <span style="margin-left: 10px; opacity: 0.95;">Pi 钱包监控 - 实时追踪余额变化</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="/monitor/" style="background: white; color: #667eea; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; white-space: nowrap; transition: all 0.3s;">
+                立即体验
+            </a>
+            <button onclick="document.getElementById('monitor-banner').style.display='none'" style="background: transparent; border: 1px solid rgba(255,255,255,0.5); color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; white-space: nowrap;">
+                关闭
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 监控功能入口 - 浮动按钮 -->
+<a href="/monitor/" id="monitor-float-btn" style="position: fixed; bottom: 30px; right: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); z-index: 9998; display: flex; align-items: center; gap: 8px; transition: all 0.3s; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+    <span style="font-size: 20px;">🔔</span>
+    <span>监控功能</span>
+</a>
+
+<style>
+    /* 悬停效果 */
+    #monitor-float-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    /* 横幅链接悬停效果 */
+    #monitor-banner a:hover {
+        background: rgba(255, 255, 255, 0.9);
+        transform: scale(1.05);
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+        #monitor-banner {
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+        #monitor-banner > div {
+            flex-direction: column;
+            text-align: center;
+        }
+        #monitor-float-btn {
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            font-size: 14px;
+        }
+    }
+
+    /* 为主内容添加顶部边距，避免被横幅遮挡 */
+    #root {
+        margin-top: 60px;
+    }
+</style>
+
 <div id="root"></div>
 </body>
 </html>

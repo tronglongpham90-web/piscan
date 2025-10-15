@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调试余额同步</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">🔍 调试余额同步</h1>
+
+        <!-- Token 信息 -->
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">🔑 Token 信息</h2>
+            <div id="tokenInfo" class="text-sm font-mono"></div>
+        </div>
+
+        <!-- 调试信息 -->
+        <div class="bg-red-50 border border-red-200 rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">🐛 数据库调试信息</h2>
+            <button onclick="debugDatabase()" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 font-semibold">
+                🔍 查看数据库详细信息
+            </button>
+            <div id="debugInfo" class="mt-4"></div>
+        </div>
+
+        <!-- 步骤 1: 获取监控列表 -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">步骤 1: 获取监控列表</h2>
+            <button onclick="getMonitors()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-semibold">
+                📋 获取监控列表
+            </button>
+            <div id="monitorList" class="mt-4"></div>
+        </div>
+        
+        <!-- 步骤 2: 同步余额 -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">步骤 2: 同步余额</h2>
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">选择监控 ID:</label>
+                <input type="number" id="monitorId" class="border rounded px-3 py-2 w-32" placeholder="ID">
+                <button onclick="syncBalance()" class="ml-2 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 font-semibold">
+                    🔄 同步余额
+                </button>
+            </div>
+            <div id="syncResult" class="mt-4"></div>
+        </div>
+        
+        <!-- 步骤 3: 查看数据库数据 -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">步骤 3: 查看更新后的数据</h2>
+            <button onclick="getMonitors()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 font-semibold">
+                🔄 重新获取监控列表
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE_URL = 'http://43.163.239.222';
+
+        // 解析 JWT Token
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // 显示 Token 信息
+        function showTokenInfo() {
+            const token = localStorage.getItem('token');
+            const div = document.getElementById('tokenInfo');
+
+            if (!token) {
+                div.innerHTML = '<p class="text-red-600">❌ 未找到 Token</p>';
+                return;
+            }
+
+            const decoded = parseJwt(token);
+            if (!decoded) {
+                div.innerHTML = '<p class="text-red-600">❌ Token 解析失败</p>';
+                return;
+            }
+
+            const now = Math.floor(Date.now() / 1000);
+            const isExpired = decoded.exp && decoded.exp < now;
+
+            div.innerHTML = `
+                <div class="bg-white p-4 rounded border">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><strong>用户 ID:</strong></div>
+                        <div class="text-blue-600 font-bold">${decoded.userId || 'N/A'}</div>
+
+                        <div><strong>用户名:</strong></div>
+                        <div>${decoded.username || 'N/A'}</div>
+
+                        <div><strong>Token 状态:</strong></div>
+                        <div class="${isExpired ? 'text-red-600' : 'text-green-600'} font-bold">
+                            ${isExpired ? '❌ 已过期' : '✅ 有效'}
+                        </div>
+
+                        ${decoded.exp ? `
+                            <div><strong>过期时间:</strong></div>
+                            <div>${new Date(decoded.exp * 1000).toLocaleString('zh-CN')}</div>
+                        ` : ''}
+                    </div>
+
+                    <details class="mt-3">
+                        <summary class="cursor-pointer text-blue-600 hover:text-blue-800">查看完整 Token 数据</summary>
+                        <pre class="mt-2 text-xs overflow-auto bg-gray-800 text-green-400 p-3 rounded">${JSON.stringify(decoded, null, 2)}</pre>
+                    </details>
+                </div>
+            `;
+        }
+
+        async function getMonitors() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('❌ 未找到 Token，请先登录');
+                return;
+            }
+
+            const div = document.getElementById('monitorList');
+            div.innerHTML = '<p class="text-blue-600">⏳ 正在加载...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/monitor?action=list`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                console.log('监控列表响应:', data);
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    let html = '<div class="space-y-4">';
+                    
+                    data.data.forEach(monitor => {
+                        const mainnetAvailable = parseFloat(monitor.mainnet_available || 0);
+                        const mainnetLocked = parseFloat(monitor.mainnet_locked || 0);
+                        const mainnetTotal = parseFloat(monitor.mainnet_total || 0);
+                        const testnetAvailable = parseFloat(monitor.testnet_available || 0);
+                        const testnetLocked = parseFloat(monitor.testnet_locked || 0);
+                        const testnetTotal = parseFloat(monitor.testnet_total || 0);
+                        const totalBalance = mainnetTotal + testnetTotal;
+                        
+                        html += `
+                            <div class="border rounded-lg p-4 bg-gray-50">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h3 class="font-bold text-lg">${monitor.name || '未命名'}</h3>
+                                        <p class="text-sm text-gray-600 font-mono">${monitor.wallet_address}</p>
+                                    </div>
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
+                                        ID: ${monitor.id}
+                                    </span>
+                                </div>
+                                
+                                <div class="bg-white p-4 rounded border mb-3">
+                                    <h4 class="font-semibold mb-2">📊 数据库中的原始数据:</h4>
+                                    <div class="grid grid-cols-2 gap-2 text-sm font-mono">
+                                        <div class="col-span-2 bg-purple-50 p-2 rounded">
+                                            <strong>总余额:</strong> ${totalBalance.toFixed(8)} π
+                                        </div>
+                                        <div class="bg-blue-50 p-2 rounded">
+                                            <strong>主网可用:</strong> ${mainnetAvailable.toFixed(8)} π
+                                        </div>
+                                        <div class="bg-blue-50 p-2 rounded">
+                                            <strong>主网锁定:</strong> ${mainnetLocked.toFixed(8)} π
+                                        </div>
+                                        <div class="bg-blue-50 p-2 rounded">
+                                            <strong>主网总计:</strong> ${mainnetTotal.toFixed(8)} π
+                                        </div>
+                                        <div class="bg-green-50 p-2 rounded">
+                                            <strong>测试网可用:</strong> ${testnetAvailable.toFixed(8)} π
+                                        </div>
+                                        <div class="bg-green-50 p-2 rounded">
+                                            <strong>测试网锁定:</strong> ${testnetLocked.toFixed(8)} π
+                                        </div>
+                                        <div class="bg-green-50 p-2 rounded">
+                                            <strong>测试网总计:</strong> ${testnetTotal.toFixed(8)} π
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button onclick="document.getElementById('monitorId').value = ${monitor.id}; syncBalance();" 
+                                    class="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-semibold">
+                                    🔄 同步此监控 (ID: ${monitor.id})
+                                </button>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    div.innerHTML = html;
+                } else {
+                    div.innerHTML = '<p class="text-yellow-600">📭 没有找到监控</p>';
+                }
+                
+            } catch (error) {
+                console.error('获取监控列表失败:', error);
+                div.innerHTML = `<p class="text-red-600">❌ 错误: ${error.message}</p>`;
+            }
+        }
+        
+        async function syncBalance() {
+            const monitorId = document.getElementById('monitorId').value;
+            if (!monitorId) {
+                alert('请输入监控 ID');
+                return;
+            }
+            
+            const token = localStorage.getItem('token');
+            const div = document.getElementById('syncResult');
+            div.innerHTML = '<p class="text-blue-600">⏳ 正在同步...</p>';
+            
+            try {
+                const url = `${API_BASE_URL}/api/monitor-sync?action=sync-one&id=${monitorId}`;
+                console.log('同步 URL:', url);
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                console.log('同步响应:', data);
+                
+                let html = `
+                    <div class="border rounded-lg p-4 ${data.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+                        <h3 class="font-bold mb-3 ${data.success ? 'text-green-800' : 'text-red-800'}">
+                            ${data.success ? '✅ 同步成功' : '❌ 同步失败'}
+                        </h3>
+                `;
+                
+                if (data.success && data.data) {
+                    const d = data.data;
+                    html += `
+                        <div class="space-y-3">
+                            <div class="bg-white p-3 rounded border">
+                                <h4 class="font-semibold mb-2">📊 API 返回的数据:</h4>
+                                <div class="grid grid-cols-2 gap-2 text-sm font-mono">
+                                    <div><strong>钱包地址:</strong></div>
+                                    <div class="break-all">${d.wallet_address || 'N/A'}</div>
+                                    
+                                    <div><strong>旧余额:</strong></div>
+                                    <div>${d.old_balance || 0} π</div>
+                                    
+                                    <div><strong>新余额:</strong></div>
+                                    <div>${d.new_balance || 0} π</div>
+                                    
+                                    <div><strong>变化:</strong></div>
+                                    <div class="${d.balance_change >= 0 ? 'text-green-600' : 'text-red-600'}">
+                                        ${d.balance_change >= 0 ? '+' : ''}${d.balance_change || 0} π
+                                    </div>
+                                    
+                                    <div class="col-span-2 bg-blue-50 p-2 rounded mt-2">
+                                        <strong>🌐 主网数据:</strong>
+                                    </div>
+                                    <div>可用余额:</div>
+                                    <div>${d.mainnet_available || 0} π</div>
+                                    <div>锁定余额:</div>
+                                    <div>${d.mainnet_locked || 0} π</div>
+                                    <div>总余额:</div>
+                                    <div>${d.mainnet_total || 0} π</div>
+                                    
+                                    <div class="col-span-2 bg-green-50 p-2 rounded mt-2">
+                                        <strong>🧪 测试网数据:</strong>
+                                    </div>
+                                    <div>可用余额:</div>
+                                    <div>${d.testnet_available || 0} π</div>
+                                    <div>锁定余额:</div>
+                                    <div>${d.testnet_locked || 0} π</div>
+                                    <div>总余额:</div>
+                                    <div>${d.testnet_total || 0} π</div>
+                                    
+                                    <div class="col-span-2 bg-purple-50 p-2 rounded mt-2">
+                                        <strong>总余额 (主网 + 测试网):</strong>
+                                        ${(parseFloat(d.mainnet_total || 0) + parseFloat(d.testnet_total || 0)).toFixed(2)} π
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-100 p-3 rounded">
+                                <h4 class="font-semibold mb-2">🔍 完整 JSON 响应:</h4>
+                                <pre class="text-xs overflow-auto bg-gray-800 text-green-400 p-3 rounded">${JSON.stringify(data, null, 2)}</pre>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `<p class="text-red-600">错误: ${data.message || '未知错误'}</p>`;
+                }
+                
+                html += `
+                        <button onclick="getMonitors()" class="mt-4 w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 font-semibold">
+                            🔄 查看更新后的数据库数据
+                        </button>
+                    </div>
+                `;
+                
+                div.innerHTML = html;
+                
+            } catch (error) {
+                console.error('同步失败:', error);
+                div.innerHTML = `<p class="text-red-600">❌ 错误: ${error.message}</p>`;
+            }
+        }
+        
+        // 调试数据库
+        async function debugDatabase() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('❌ 未找到 Token，请先登录');
+                return;
+            }
+
+            const div = document.getElementById('debugInfo');
+            div.innerHTML = '<p class="text-blue-600">⏳ 正在查询数据库...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/debug-monitors`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                console.log('调试信息:', data);
+
+                if (data.success && data.debug_info) {
+                    const info = data.debug_info;
+                    let html = '<div class="space-y-4">';
+
+                    // Token 信息
+                    html += `
+                        <div class="bg-white p-4 rounded border">
+                            <h4 class="font-semibold mb-2">🔑 Token 解析结果:</h4>
+                            <div class="text-sm font-mono">
+                                <div>用户 ID: <span class="text-blue-600 font-bold">${info.token_decoded.userId}</span></div>
+                                <div>用户名: ${info.token_decoded.username}</div>
+                                <div>过期时间: ${info.token_decoded.exp || 'N/A'}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    // 用户信息
+                    html += `
+                        <div class="bg-white p-4 rounded border">
+                            <h4 class="font-semibold mb-2">👤 数据库中的用户信息:</h4>
+                            ${info.user_in_database ? `
+                                <div class="text-sm font-mono">
+                                    <div>ID: ${info.user_in_database.id}</div>
+                                    <div>用户名: ${info.user_in_database.username}</div>
+                                    <div>邮箱: ${info.user_in_database.email || 'N/A'}</div>
+                                </div>
+                            ` : '<p class="text-red-600">❌ 用户不存在</p>'}
+                        </div>
+                    `;
+
+                    // 所有监控
+                    html += `
+                        <div class="bg-white p-4 rounded border">
+                            <h4 class="font-semibold mb-2">📊 数据库中的所有监控 (共 ${info.all_monitors_count} 个):</h4>
+                            ${info.all_monitors.length > 0 ? `
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full text-xs">
+                                        <thead class="bg-gray-100">
+                                            <tr>
+                                                <th class="px-2 py-1 text-left">ID</th>
+                                                <th class="px-2 py-1 text-left">User ID</th>
+                                                <th class="px-2 py-1 text-left">名称</th>
+                                                <th class="px-2 py-1 text-left">钱包地址</th>
+                                                <th class="px-2 py-1 text-left">状态</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${info.all_monitors.map(m => `
+                                                <tr class="${m.user_id === info.token_decoded.userId ? 'bg-green-50' : ''}">
+                                                    <td class="px-2 py-1">${m.id}</td>
+                                                    <td class="px-2 py-1 font-bold ${m.user_id === info.token_decoded.userId ? 'text-green-600' : 'text-gray-600'}">${m.user_id}</td>
+                                                    <td class="px-2 py-1">${m.monitor_name || 'N/A'}</td>
+                                                    <td class="px-2 py-1 font-mono text-xs">${m.wallet_address.substring(0, 10)}...</td>
+                                                    <td class="px-2 py-1">${m.status}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ` : '<p class="text-gray-600">没有监控</p>'}
+                        </div>
+                    `;
+
+                    // 当前用户的监控
+                    html += `
+                        <div class="bg-white p-4 rounded border">
+                            <h4 class="font-semibold mb-2">✅ 当前用户的监控 (共 ${info.user_monitors_count} 个):</h4>
+                            ${info.user_monitors.length > 0 ? `
+                                <pre class="text-xs overflow-auto bg-gray-800 text-green-400 p-3 rounded">${JSON.stringify(info.user_monitors, null, 2)}</pre>
+                            ` : '<p class="text-red-600 font-bold">❌ 当前用户没有监控！这就是问题所在！</p>'}
+                        </div>
+                    `;
+
+                    html += '</div>';
+                    div.innerHTML = html;
+                } else {
+                    div.innerHTML = `<p class="text-red-600">❌ 错误: ${data.message || '未知错误'}</p>`;
+                }
+
+            } catch (error) {
+                console.error('调试失败:', error);
+                div.innerHTML = `<p class="text-red-600">❌ 错误: ${error.message}</p>`;
+            }
+        }
+
+        // 页面加载时自动获取监控列表
+        window.onload = function() {
+            showTokenInfo();
+            debugDatabase();
+            getMonitors();
+        };
+    </script>
+</body>
+</html>
+

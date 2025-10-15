@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账户设置 - PiExplorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+        <!-- 侧边栏 -->
+        <aside class="w-64 bg-white shadow-lg">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-purple-600">PiExplorer</h1>
+                <p class="text-sm text-gray-500 mt-1">钱包监控系统</p>
+            </div>
+            
+            <nav class="mt-6">
+                <a href="/monitor/dashboard.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">📊</span>
+                    <span>仪表板</span>
+                </a>
+                <a href="/monitor/add-monitor.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">➕</span>
+                    <span>添加监控</span>
+                </a>
+                <a href="/monitor/notifications.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">🔔</span>
+                    <span>通知历史</span>
+                </a>
+                <a href="/monitor/referral.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">💰</span>
+                    <span>推荐返现</span>
+                </a>
+                <a href="/monitor/settings.html" class="flex items-center px-6 py-3 bg-purple-50 text-purple-600 border-r-4 border-purple-600">
+                    <span class="text-xl mr-3">⚙️</span>
+                    <span>账户设置</span>
+                </a>
+                <a href="/monitor/social-tasks.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">🎯</span>
+                    <span>社交任务</span>
+                </a>
+                <a href="/monitor/upgrade.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">⭐</span>
+                    <span>升级会员</span>
+                </a>
+            </nav>
+
+            <div class="absolute bottom-0 w-64 p-6 border-t">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-900" id="user-email">用户</p>
+                        <p class="text-xs text-gray-500">免费版</p>
+                    </div>
+                    <button id="logout-btn" class="text-red-600 hover:text-red-700">
+                        <span class="text-xl">🚪</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="flex-1 p-8">
+            <div class="max-w-4xl mx-auto">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800">账户设置</h2>
+                    <p class="text-gray-600 mt-2">管理您的个人信息和偏好设置</p>
+                </div>
+
+                <!-- 个人信息 -->
+                <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">个人信息</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">邮箱地址</label>
+                            <input type="email" id="email" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" value="加载中...">
+                            <p class="text-xs text-gray-500 mt-1">邮箱地址不可修改</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">会员类型</label>
+                            <div class="flex items-center space-x-2">
+                                <span id="membership-badge" class="px-3 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800">免费版</span>
+                                <a href="/monitor/upgrade.html" class="text-purple-600 hover:text-purple-700 text-sm font-medium">升级会员 →</a>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">注册时间</label>
+                            <input type="text" id="created-at" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" value="加载中...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 修改密码 -->
+                <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">修改密码</h3>
+                    
+                    <form id="password-form" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">当前密码</label>
+                            <input type="password" id="current-password" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">新密码</label>
+                            <input type="password" id="new-password" required minlength="6" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                            <p class="text-xs text-gray-500 mt-1">密码长度至少6个字符</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">确认新密码</label>
+                            <input type="password" id="confirm-password" required minlength="6" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+
+                        <button type="submit" class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                            更新密码
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 通知设置 -->
+                <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">通知设置</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium text-gray-900">邮件通知</p>
+                                <p class="text-sm text-gray-500">余额变化时发送邮件通知</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="email-notifications" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium text-gray-900">浏览器通知</p>
+                                <p class="text-sm text-gray-500">在浏览器中显示通知</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="browser-notifications" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium text-gray-900">每日摘要</p>
+                                <p class="text-sm text-gray-500">每天发送监控摘要邮件</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="daily-summary" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                            </label>
+                        </div>
+
+                        <button onclick="saveNotificationSettings()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            保存通知设置
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 危险区域 -->
+                <div class="bg-white rounded-xl shadow-md p-6 border-2 border-red-200">
+                    <h3 class="text-xl font-bold text-red-600 mb-6">危险区域</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium text-gray-900">删除所有监控</p>
+                                <p class="text-sm text-gray-500">删除您的所有钱包监控记录</p>
+                            </div>
+                            <button onclick="deleteAllMonitors()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                                删除监控
+                            </button>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium text-gray-900">删除账户</p>
+                                <p class="text-sm text-gray-500">永久删除您的账户和所有数据</p>
+                            </div>
+                            <button onclick="deleteAccount()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                                删除账户
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://43.163.239.222';
+        const VERCEL_BYPASS_TOKEN = 'q9Ad6yNz2v787XKcQ1uE0Q8H0NxNddZW';
+
+        // 检查登录状态
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const userEmail = localStorage.getItem('userEmail');
+            
+            if (!token || !userEmail) {
+                window.location.href = '/auth/login.html';
+                return false;
+            }
+            
+            document.getElementById('user-email').textContent = userEmail;
+            return true;
+        }
+
+        // 退出登录
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userEmail');
+            window.location.href = '/auth/login.html';
+        });
+
+        // 加载用户信息
+        async function loadUserInfo() {
+            if (!checkAuth()) return;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/api/user?action=profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const user = data.data;
+                    document.getElementById('email').value = user.email;
+                    document.getElementById('created-at').value = new Date(user.createdAt).toLocaleString('zh-CN');
+                    
+                    const membershipBadge = document.getElementById('membership-badge');
+                    membershipBadge.textContent = getMembershipName(user.membershipType);
+                    membershipBadge.className = `px-3 py-1 text-sm font-semibold rounded-full ${getMembershipBadge(user.membershipType)}`;
+
+                    // 加载通知设置
+                    if (user.settings) {
+                        document.getElementById('email-notifications').checked = user.settings.emailNotifications;
+                        document.getElementById('browser-notifications').checked = user.settings.browserNotifications;
+                        document.getElementById('daily-summary').checked = user.settings.dailySummary;
+                    }
+                }
+            } catch (error) {
+                console.error('加载用户信息失败:', error);
+            }
+        }
+
+        // 获取会员徽章样式
+        function getMembershipBadge(type) {
+            const badges = {
+                'free': 'bg-gray-100 text-gray-800',
+                'social': 'bg-blue-100 text-blue-800',
+                'paid': 'bg-purple-100 text-purple-800'
+            };
+            return badges[type] || 'bg-gray-100 text-gray-800';
+        }
+
+        // 获取会员名称
+        function getMembershipName(type) {
+            const names = {
+                'free': '免费版',
+                'social': '社交任务版',
+                'paid': '付费版'
+            };
+            return names[type] || type;
+        }
+
+        // 修改密码
+        document.getElementById('password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (newPassword !== confirmPassword) {
+                alert('❌ 两次输入的新密码不一致');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/api/user?action=change-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        currentPassword,
+                        newPassword
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ 密码修改成功，请重新登录');
+                    localStorage.removeItem('token');
+                    window.location.href = '/auth/login.html';
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                console.error('修改密码失败:', error);
+                alert('❌ 修改密码失败，请稍后重试');
+            }
+        });
+
+        // 保存通知设置
+        async function saveNotificationSettings() {
+            try {
+                const token = localStorage.getItem('token');
+                const settings = {
+                    emailNotifications: document.getElementById('email-notifications').checked,
+                    browserNotifications: document.getElementById('browser-notifications').checked,
+                    dailySummary: document.getElementById('daily-summary').checked
+                };
+
+                const response = await fetch(`${API_BASE_URL}/api/user?action=settings`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ 通知设置已保存');
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                console.error('保存设置失败:', error);
+                alert('❌ 保存设置失败，请稍后重试');
+            }
+        }
+
+        // 删除所有监控
+        async function deleteAllMonitors() {
+            if (!confirm('⚠️ 确定要删除所有监控吗？此操作不可恢复！')) return;
+            if (!confirm('⚠️ 再次确认：真的要删除所有监控吗？')) return;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/api/monitor?action=delete-all`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ 所有监控已删除');
+                    window.location.href = '/monitor/dashboard.html';
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                console.error('删除监控失败:', error);
+                alert('❌ 删除失败，请稍后重试');
+            }
+        }
+
+        // 删除账户
+        async function deleteAccount() {
+            if (!confirm('⚠️ 警告：删除账户将永久删除您的所有数据，包括监控记录、通知历史等。此操作不可恢复！')) return;
+            if (!confirm('⚠️ 最后确认：真的要删除账户吗？')) return;
+
+            const password = prompt('请输入您的密码以确认删除：');
+            if (!password) return;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/api/user?action=delete-account`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ 账户已删除');
+                    localStorage.clear();
+                    window.location.href = '/';
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                console.error('删除账户失败:', error);
+                alert('❌ 删除失败，请稍后重试');
+            }
+        }
+
+        // 页面加载时执行
+        window.addEventListener('DOMContentLoaded', () => {
+            loadUserInfo();
+        });
+    </script>
+</body>
+</html>
+

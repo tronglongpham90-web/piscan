@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>升级会员 - PiExplorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+        <!-- 侧边栏 -->
+        <aside class="w-64 bg-white shadow-lg">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-purple-600">PiExplorer</h1>
+                <p class="text-sm text-gray-500 mt-1">钱包监控系统</p>
+            </div>
+            
+            <nav class="mt-6">
+                <a href="/monitor/dashboard.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">📊</span>
+                    <span>仪表板</span>
+                </a>
+                <a href="/monitor/add-monitor.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">➕</span>
+                    <span>添加监控</span>
+                </a>
+                <a href="/monitor/notifications.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">🔔</span>
+                    <span>通知历史</span>
+                </a>
+                <a href="/monitor/referral.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">💰</span>
+                    <span>推荐返现</span>
+                </a>
+                <a href="/monitor/settings.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">⚙️</span>
+                    <span>账户设置</span>
+                </a>
+                <a href="/monitor/social-tasks.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">🎯</span>
+                    <span>社交任务</span>
+                </a>
+                <a href="/monitor/upgrade.html" class="flex items-center px-6 py-3 bg-purple-50 text-purple-600 border-r-4 border-purple-600">
+                    <span class="text-xl mr-3">⭐</span>
+                    <span>升级会员</span>
+                </a>
+            </nav>
+
+            <div class="absolute bottom-0 w-64 p-6 border-t">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-900" id="user-email">用户</p>
+                        <p class="text-xs text-gray-500" id="current-plan">免费版</p>
+                    </div>
+                    <button id="logout-btn" class="text-red-600 hover:text-red-700">
+                        <span class="text-xl">🚪</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="flex-1 p-8">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold text-gray-800">选择适合您的方案</h2>
+                    <p class="text-gray-600 mt-3 text-lg">解锁更多功能，享受更好的监控体验</p>
+                </div>
+
+                <!-- 价格卡片 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                    <!-- 免费版 -->
+                    <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200">
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900">免费版</h3>
+                            <div class="mt-4">
+                                <span class="text-5xl font-bold text-gray-900">¥0</span>
+                                <span class="text-gray-500">/永久</span>
+                            </div>
+                        </div>
+                        <ul class="space-y-4 mb-8">
+                            <li class="flex items-center space-x-3">
+                                <span class="text-green-600">✓</span>
+                                <span class="text-gray-700">最多 <strong>3 个</strong>监控</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <span class="text-green-600">✓</span>
+                                <span class="text-gray-700">每天检查 <strong>1 次</strong></span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <span class="text-green-600">✓</span>
+                                <span class="text-gray-700">基础邮件通知</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <span class="text-gray-400">✗</span>
+                                <span class="text-gray-400">自定义阈值</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <span class="text-gray-400">✗</span>
+                                <span class="text-gray-400">历史数据导出</span>
+                            </li>
+                        </ul>
+                        <button disabled class="w-full px-6 py-3 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed">
+                            当前方案
+                        </button>
+                    </div>
+
+                    <!-- 社交任务版 - 推荐 -->
+                    <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-2xl p-8 border-4 border-purple-400 transform scale-105 relative">
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                            <span class="bg-yellow-400 text-gray-900 px-4 py-1 rounded-full text-sm font-bold">🔥 推荐</span>
+                        </div>
+                        <div class="text-center mb-6 text-white">
+                            <h3 class="text-2xl font-bold">社交任务版</h3>
+                            <div class="mt-4">
+                                <span class="text-5xl font-bold">免费</span>
+                                <span class="text-blue-100">/30天</span>
+                            </div>
+                            <p class="text-sm text-blue-100 mt-2">完成社交任务即可解锁</p>
+                        </div>
+                        <ul class="space-y-4 mb-8 text-white">
+                            <li class="flex items-center space-x-3">
+                                <span class="text-yellow-300">✓</span>
+                                <span>最多 <strong>10 个</strong>监控</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <span class="text-yellow-300">✓</span>
+                                <span>每小时检查 <strong>1 次</strong></span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <span class="text-yellow-300">✓</span>
+                                <span>邮件 + 浏览器通知</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <span class="text-yellow-300">✓</span>
+                                <span>自定义阈值通知</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <span class="text-yellow-300">✓</span>
+                                <span>30天历史数据</span>
+                            </li>
+                        </ul>
+                        <a href="/monitor/social-tasks.html" class="block w-full px-6 py-3 bg-white text-purple-600 rounded-lg font-bold text-center hover:bg-gray-100">
+                            去完成任务
+                        </a>
+                    </div>
+
+                    <!-- 付费版 -->
+                    <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-purple-200">
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900">付费版</h3>
+                            <div class="mt-4">
+                                <span class="text-5xl font-bold text-purple-600">¥29</span>
+                                <span class="text-gray-500">/月</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-2">或 ¥299/年 (省 ¥49)</p>
+                        </div>
+                        <ul class="space-y-4 mb-8">
+                            <li class="flex items-center space-x-3">
+                                <span class="text-purple-600">✓</span>
+                                <span class="text-gray-700"><strong>无限</strong>监控数量</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <span class="text-purple-600">✓</span>
+                                <span class="text-gray-700">每 <strong>5 分钟</strong>检查</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <span class="text-purple-600">✓</span>
+                                <span class="text-gray-700">全渠道通知</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <span class="text-purple-600">✓</span>
+                                <span class="text-gray-700">高级阈值规则</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <span class="text-purple-600">✓</span>
+                                <span class="text-gray-700">无限历史数据</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <span class="text-purple-600">✓</span>
+                                <span class="text-gray-700">API 访问</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <span class="text-purple-600">✓</span>
+                                <span class="text-gray-700">优先技术支持</span>
+                            </li>
+                        </ul>
+                        <button onclick="showPaymentModal('monthly')" class="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-bold hover:bg-purple-700">
+                            立即升级
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 功能对比表 -->
+                <div class="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">详细功能对比</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">功能</th>
+                                    <th class="px-6 py-4 text-center text-sm font-semibold text-gray-900">免费版</th>
+                                    <th class="px-6 py-4 text-center text-sm font-semibold text-gray-900">社交任务版</th>
+                                    <th class="px-6 py-4 text-center text-sm font-semibold text-gray-900">付费版</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 text-sm text-gray-900">监控数量</td>
+                                    <td class="px-6 py-4 text-sm text-center text-gray-600">3 个</td>
+                                    <td class="px-6 py-4 text-sm text-center text-blue-600 font-semibold">10 个</td>
+                                    <td class="px-6 py-4 text-sm text-center text-purple-600 font-semibold">无限</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 text-sm text-gray-900">检查频率</td>
+                                    <td class="px-6 py-4 text-sm text-center text-gray-600">每天</td>
+                                    <td class="px-6 py-4 text-sm text-center text-blue-600 font-semibold">每小时</td>
+                                    <td class="px-6 py-4 text-sm text-center text-purple-600 font-semibold">每5分钟</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 text-sm text-gray-900">通知方式</td>
+                                    <td class="px-6 py-4 text-sm text-center text-gray-600">邮件</td>
+                                    <td class="px-6 py-4 text-sm text-center text-blue-600 font-semibold">邮件+浏览器</td>
+                                    <td class="px-6 py-4 text-sm text-center text-purple-600 font-semibold">全渠道</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 text-sm text-gray-900">自定义阈值</td>
+                                    <td class="px-6 py-4 text-sm text-center text-gray-400">✗</td>
+                                    <td class="px-6 py-4 text-sm text-center text-blue-600">✓</td>
+                                    <td class="px-6 py-4 text-sm text-center text-purple-600">✓ 高级</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 text-sm text-gray-900">历史数据</td>
+                                    <td class="px-6 py-4 text-sm text-center text-gray-600">7天</td>
+                                    <td class="px-6 py-4 text-sm text-center text-blue-600 font-semibold">30天</td>
+                                    <td class="px-6 py-4 text-sm text-center text-purple-600 font-semibold">无限</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 text-sm text-gray-900">数据导出</td>
+                                    <td class="px-6 py-4 text-sm text-center text-gray-400">✗</td>
+                                    <td class="px-6 py-4 text-sm text-center text-gray-400">✗</td>
+                                    <td class="px-6 py-4 text-sm text-center text-purple-600">✓</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 text-sm text-gray-900">API 访问</td>
+                                    <td class="px-6 py-4 text-sm text-center text-gray-400">✗</td>
+                                    <td class="px-6 py-4 text-sm text-center text-gray-400">✗</td>
+                                    <td class="px-6 py-4 text-sm text-center text-purple-600">✓</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 text-sm text-gray-900">技术支持</td>
+                                    <td class="px-6 py-4 text-sm text-center text-gray-600">社区</td>
+                                    <td class="px-6 py-4 text-sm text-center text-blue-600">邮件</td>
+                                    <td class="px-6 py-4 text-sm text-center text-purple-600 font-semibold">优先</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 常见问题 -->
+                <div class="mt-12 bg-white rounded-2xl shadow-lg p-8">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">常见问题</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">如何获得社交任务版会员？</h4>
+                            <p class="text-gray-600">前往"社交任务"页面，完成所有6个任务即可免费解锁30天社交任务版会员。</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">付费会员支持哪些支付方式？</h4>
+                            <p class="text-gray-600">支持支付宝、微信支付、Pi币支付。</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">可以随时取消订阅吗？</h4>
+                            <p class="text-gray-600">可以。您可以随时在账户设置中取消订阅，已付费的周期仍然有效。</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">会员到期后会怎样？</h4>
+                            <p class="text-gray-600">会员到期后，您的账户会自动降级为免费版，超出限制的监控会被暂停（不会删除）。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 支付弹窗 -->
+    <div id="payment-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6">选择支付方式</h3>
+            
+            <div class="space-y-4 mb-6">
+                <button onclick="selectPayment('alipay')" class="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-3xl">💳</span>
+                        <span class="font-semibold">支付宝</span>
+                    </div>
+                    <span class="text-gray-400">→</span>
+                </button>
+                
+                <button onclick="selectPayment('wechat')" class="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg hover:border-green-500">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-3xl">💚</span>
+                        <span class="font-semibold">微信支付</span>
+                    </div>
+                    <span class="text-gray-400">→</span>
+                </button>
+                
+                <button onclick="selectPayment('pi')" class="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-3xl">π</span>
+                        <span class="font-semibold">Pi币支付</span>
+                    </div>
+                    <span class="text-gray-400">→</span>
+                </button>
+            </div>
+
+            <button onclick="closePaymentModal()" class="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                取消
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://43.163.239.222';
+        const VERCEL_BYPASS_TOKEN = 'q9Ad6yNz2v787XKcQ1uE0Q8H0NxNddZW';
+        let selectedPlan = '';
+
+        // 检查登录状态
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const userEmail = localStorage.getItem('userEmail');
+            
+            if (!token || !userEmail) {
+                window.location.href = '/auth/login.html';
+                return false;
+            }
+            
+            document.getElementById('user-email').textContent = userEmail;
+            return true;
+        }
+
+        // 退出登录
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userEmail');
+            window.location.href = '/auth/login.html';
+        });
+
+        // 显示支付弹窗
+        function showPaymentModal(plan) {
+            selectedPlan = plan;
+            document.getElementById('payment-modal').classList.remove('hidden');
+        }
+
+        // 关闭支付弹窗
+        function closePaymentModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
+        }
+
+        // 选择支付方式
+        async function selectPayment(method) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/api/payment/create?x-vercel-protection-bypass=${VERCEL_BYPASS_TOKEN}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'x-vercel-protection-bypass': VERCEL_BYPASS_TOKEN
+                    },
+                    body: JSON.stringify({
+                        plan: selectedPlan,
+                        paymentMethod: method
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // 跳转到支付页面
+                    window.location.href = data.data.paymentUrl;
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                console.error('创建支付失败:', error);
+                alert('❌ 创建支付失败，请稍后重试');
+            }
+        }
+
+        // 页面加载时执行
+        window.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+        });
+    </script>
+</body>
+</html>
+

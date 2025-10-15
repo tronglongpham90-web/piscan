@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通知历史 - PiExplorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+        <!-- 侧边栏 -->
+        <aside class="w-64 bg-white shadow-lg">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-purple-600">PiExplorer</h1>
+                <p class="text-sm text-gray-500 mt-1">钱包监控系统</p>
+            </div>
+            
+            <nav class="mt-6">
+                <a href="/monitor/dashboard.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">📊</span>
+                    <span>仪表板</span>
+                </a>
+                <a href="/monitor/add-monitor.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">➕</span>
+                    <span>添加监控</span>
+                </a>
+                <a href="/monitor/notifications.html" class="flex items-center px-6 py-3 bg-purple-50 text-purple-600 border-r-4 border-purple-600">
+                    <span class="text-xl mr-3">🔔</span>
+                    <span>通知历史</span>
+                </a>
+                <a href="/monitor/referral.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">💰</span>
+                    <span>推荐返现</span>
+                </a>
+                <a href="/monitor/settings.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">⚙️</span>
+                    <span>账户设置</span>
+                </a>
+                <a href="/monitor/social-tasks.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">🎯</span>
+                    <span>社交任务</span>
+                </a>
+                <a href="/monitor/upgrade.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">⭐</span>
+                    <span>升级会员</span>
+                </a>
+            </nav>
+
+            <div class="absolute bottom-0 w-64 p-6 border-t">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-900" id="user-email">用户</p>
+                        <p class="text-xs text-gray-500">免费版</p>
+                    </div>
+                    <button id="logout-btn" class="text-red-600 hover:text-red-700">
+                        <span class="text-xl">🚪</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="flex-1 p-8">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800">通知历史</h2>
+                        <p class="text-gray-600 mt-2">查看所有余额变化通知</p>
+                    </div>
+                    <button onclick="markAllAsRead()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                        全部标记为已读
+                    </button>
+                </div>
+
+                <!-- 筛选器 -->
+                <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">状态</label>
+                            <select id="filter-status" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                <option value="all">全部</option>
+                                <option value="unread">未读</option>
+                                <option value="read">已读</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">类型</label>
+                            <select id="filter-type" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                <option value="all">全部</option>
+                                <option value="balance_increase">余额增加</option>
+                                <option value="balance_decrease">余额减少</option>
+                                <option value="threshold_alert">阈值警报</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">时间范围</label>
+                            <select id="filter-time" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                <option value="all">全部</option>
+                                <option value="today">今天</option>
+                                <option value="week">最近7天</option>
+                                <option value="month">最近30天</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="applyFilters()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                应用筛选
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 通知列表 -->
+                <div class="bg-white rounded-xl shadow-md">
+                    <!-- 加载状态 -->
+                    <div id="loading-state" class="p-12 text-center">
+                        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                        <p class="mt-4 text-gray-600">加载通知中...</p>
+                    </div>
+
+                    <!-- 空状态 -->
+                    <div id="empty-state" class="hidden p-12 text-center">
+                        <span class="text-6xl">🔔</span>
+                        <p class="mt-4 text-xl font-semibold text-gray-700">暂无通知</p>
+                        <p class="mt-2 text-gray-500">当钱包余额发生变化时，您会收到通知</p>
+                    </div>
+
+                    <!-- 通知列表 -->
+                    <div id="notifications-list" class="hidden divide-y divide-gray-200">
+                        <!-- 动态填充 -->
+                    </div>
+                </div>
+
+                <!-- 分页 -->
+                <div id="pagination" class="hidden mt-6 flex items-center justify-between">
+                    <div class="text-sm text-gray-700">
+                        显示 <span id="page-info">1-20</span> 条，共 <span id="total-count">0</span> 条
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="previousPage()" id="prev-btn" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50" disabled>
+                            上一页
+                        </button>
+                        <button onclick="nextPage()" id="next-btn" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50">
+                            下一页
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://43.163.239.222';
+        const VERCEL_BYPASS_TOKEN = 'q9Ad6yNz2v787XKcQ1uE0Q8H0NxNddZW';
+        
+        let currentPage = 1;
+        let totalPages = 1;
+        let filters = {
+            status: 'all',
+            type: 'all',
+            time: 'all'
+        };
+
+        // 检查登录状态
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const userEmail = localStorage.getItem('userEmail');
+            
+            if (!token || !userEmail) {
+                window.location.href = '/auth/login.html';
+                return false;
+            }
+            
+            document.getElementById('user-email').textContent = userEmail;
+            return true;
+        }
+
+        // 退出登录
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userEmail');
+            window.location.href = '/auth/login.html';
+        });
+
+        // 加载通知
+        async function loadNotifications() {
+            if (!checkAuth()) return;
+
+            try {
+                const token = localStorage.getItem('token');
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    limit: 20,
+                    'x-vercel-protection-bypass': VERCEL_BYPASS_TOKEN
+                });
+
+                // 添加筛选参数
+                if (filters.status !== 'all') {
+                    params.append('is_read', filters.status === 'read');
+                }
+                if (filters.type !== 'all') {
+                    params.append('type', filters.type);
+                }
+
+                const response = await fetch(`${API_BASE_URL}/api/notifications?action=list&${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                document.getElementById('loading-state').classList.add('hidden');
+
+                if (data.success && data.data.notifications.length > 0) {
+                    renderNotifications(data.data.notifications);
+                    updatePagination(data.data.pagination);
+                    document.getElementById('notifications-list').classList.remove('hidden');
+                    document.getElementById('pagination').classList.remove('hidden');
+                } else {
+                    document.getElementById('empty-state').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('加载通知失败:', error);
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('empty-state').classList.remove('hidden');
+            }
+        }
+
+        // 渲染通知列表
+        function renderNotifications(notifications) {
+            const container = document.getElementById('notifications-list');
+            container.innerHTML = '';
+
+            notifications.forEach(notif => {
+                const div = document.createElement('div');
+                div.className = `p-6 hover:bg-gray-50 cursor-pointer ${notif.isRead ? 'bg-white' : 'bg-blue-50'}`;
+                div.onclick = () => markAsRead(notif.id);
+
+                const typeIcon = getTypeIcon(notif.type);
+                const typeColor = getTypeColor(notif.type);
+
+                div.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start space-x-4 flex-1">
+                            <div class="text-3xl">${typeIcon}</div>
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2">
+                                    <h3 class="font-semibold text-gray-900">${notif.title}</h3>
+                                    ${!notif.isRead ? '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">未读</span>' : ''}
+                                </div>
+                                <p class="text-gray-600 mt-1">${notif.message}</p>
+                                ${notif.balanceChange ? `
+                                    <div class="mt-2 text-sm">
+                                        <span class="text-gray-500">余额变化:</span>
+                                        <span class="${notif.balanceChange > 0 ? 'text-green-600' : 'text-red-600'} font-semibold">
+                                            ${notif.balanceChange > 0 ? '+' : ''}${parseFloat(notif.balanceChange).toFixed(2)} π
+                                        </span>
+                                    </div>
+                                ` : ''}
+                                <p class="text-xs text-gray-400 mt-2">${new Date(notif.createdAt).toLocaleString('zh-CN')}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(div);
+            });
+        }
+
+        // 获取类型图标
+        function getTypeIcon(type) {
+            const icons = {
+                'balance_increase': '📈',
+                'balance_decrease': '📉',
+                'threshold_alert': '⚠️',
+                'system': '🔔'
+            };
+            return icons[type] || '📬';
+        }
+
+        // 获取类型颜色
+        function getTypeColor(type) {
+            const colors = {
+                'balance_increase': 'green',
+                'balance_decrease': 'red',
+                'threshold_alert': 'yellow',
+                'system': 'blue'
+            };
+            return colors[type] || 'gray';
+        }
+
+        // 标记为已读
+        async function markAsRead(id) {
+            try {
+                const token = localStorage.getItem('token');
+                await fetch(`${API_BASE_URL}/api/notifications?action=read&id=${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                loadNotifications();
+            } catch (error) {
+                console.error('标记已读失败:', error);
+            }
+        }
+
+        // 全部标记为已读
+        async function markAllAsRead() {
+            try {
+                const token = localStorage.getItem('token');
+                await fetch(`${API_BASE_URL}/api/notifications?action=read-all`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                loadNotifications();
+            } catch (error) {
+                console.error('全部标记已读失败:', error);
+            }
+        }
+
+        // 应用筛选
+        function applyFilters() {
+            filters.status = document.getElementById('filter-status').value;
+            filters.type = document.getElementById('filter-type').value;
+            filters.time = document.getElementById('filter-time').value;
+            currentPage = 1;
+            loadNotifications();
+        }
+
+        // 更新分页
+        function updatePagination(pagination) {
+            totalPages = pagination.totalPages;
+            document.getElementById('total-count').textContent = pagination.total;
+            document.getElementById('page-info').textContent = `${(pagination.page - 1) * pagination.limit + 1}-${Math.min(pagination.page * pagination.limit, pagination.total)}`;
+            
+            document.getElementById('prev-btn').disabled = pagination.page === 1;
+            document.getElementById('next-btn').disabled = pagination.page === pagination.totalPages;
+        }
+
+        // 上一页
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                loadNotifications();
+            }
+        }
+
+        // 下一页
+        function nextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadNotifications();
+            }
+        }
+
+        // 页面加载时执行
+        window.addEventListener('DOMContentLoaded', () => {
+            loadNotifications();
+        });
+    </script>
+</body>
+</html>
+

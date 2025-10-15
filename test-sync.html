@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试余额同步</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">测试余额同步功能</h1>
+        
+        <!-- 输入区域 -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">1. 输入信息</h2>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">监控 ID:</label>
+                <input type="number" id="monitorId" class="w-full border rounded px-3 py-2" placeholder="输入监控 ID (例如: 1)">
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Token:</label>
+                <input type="text" id="token" class="w-full border rounded px-3 py-2" placeholder="从 localStorage 获取">
+                <button onclick="loadToken()" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    从 localStorage 加载 Token
+                </button>
+            </div>
+            
+            <button onclick="testSync()" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-semibold">
+                🔄 测试同步
+            </button>
+        </div>
+        
+        <!-- 响应区域 -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">2. API 响应</h2>
+            <div id="response" class="bg-gray-50 p-4 rounded border overflow-auto" style="max-height: 400px;">
+                <p class="text-gray-500">等待测试...</p>
+            </div>
+        </div>
+        
+        <!-- 解析结果 -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">3. 余额数据</h2>
+            <div id="balanceData" class="space-y-4">
+                <p class="text-gray-500">等待同步...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE_URL = 'http://43.163.239.222';
+        
+        // 从 localStorage 加载 Token
+        function loadToken() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                document.getElementById('token').value = token;
+                alert('✅ Token 已加载');
+            } else {
+                alert('❌ 未找到 Token，请先登录');
+            }
+        }
+        
+        // 测试同步
+        async function testSync() {
+            const monitorId = document.getElementById('monitorId').value;
+            const token = document.getElementById('token').value;
+            
+            if (!monitorId) {
+                alert('请输入监控 ID');
+                return;
+            }
+            
+            if (!token) {
+                alert('请输入 Token');
+                return;
+            }
+            
+            const responseDiv = document.getElementById('response');
+            const balanceDiv = document.getElementById('balanceData');
+            
+            responseDiv.innerHTML = '<p class="text-blue-600">⏳ 正在同步...</p>';
+            balanceDiv.innerHTML = '<p class="text-blue-600">⏳ 正在同步...</p>';
+            
+            try {
+                const url = `${API_BASE_URL}/api/monitor-sync?action=sync-one&id=${monitorId}`;
+                console.log('请求 URL:', url);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('响应状态:', response.status);
+                
+                const data = await response.json();
+                console.log('响应数据:', data);
+                
+                // 显示原始响应
+                responseDiv.innerHTML = `
+                    <div class="mb-2">
+                        <span class="font-semibold">状态码:</span> 
+                        <span class="${response.ok ? 'text-green-600' : 'text-red-600'}">${response.status}</span>
+                    </div>
+                    <div class="mb-2">
+                        <span class="font-semibold">成功:</span> 
+                        <span class="${data.success ? 'text-green-600' : 'text-red-600'}">${data.success ? '✅ 是' : '❌ 否'}</span>
+                    </div>
+                    <pre class="bg-gray-800 text-green-400 p-4 rounded mt-4 overflow-auto">${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                // 如果成功，显示余额数据
+                if (data.success && data.data) {
+                    const monitor = data.data;
+                    
+                    balanceDiv.innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- 总余额 -->
+                            <div class="col-span-2 bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg">
+                                <p class="text-sm text-purple-600 mb-1">总余额（主网 + 测试网）</p>
+                                <p class="text-3xl font-bold text-purple-900">
+                                    ${parseFloat(monitor.mainnet_total || 0) + parseFloat(monitor.testnet_total || 0)} π
+                                </p>
+                            </div>
+                            
+                            <!-- 主网 -->
+                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
+                                <p class="text-sm font-semibold text-blue-600 mb-2">🌐 主网 (Mainnet)</p>
+                                <p class="text-2xl font-bold text-blue-900 mb-2">${parseFloat(monitor.mainnet_total || 0).toFixed(2)} π</p>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-blue-600">可用余额:</span>
+                                        <span class="font-semibold text-blue-900">${parseFloat(monitor.mainnet_available || 0).toFixed(2)} π</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-blue-600">锁定余额:</span>
+                                        <span class="font-semibold text-blue-900">${parseFloat(monitor.mainnet_locked || 0).toFixed(2)} π</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 测试网 -->
+                            <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg">
+                                <p class="text-sm font-semibold text-green-600 mb-2">🧪 测试网 (Testnet)</p>
+                                <p class="text-2xl font-bold text-green-900 mb-2">${parseFloat(monitor.testnet_total || 0).toFixed(2)} π</p>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-green-600">可用余额:</span>
+                                        <span class="font-semibold text-green-900">${parseFloat(monitor.testnet_available || 0).toFixed(2)} π</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-green-600">锁定余额:</span>
+                                        <span class="font-semibold text-green-900">${parseFloat(monitor.testnet_locked || 0).toFixed(2)} π</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 p-4 bg-gray-50 rounded">
+                            <p class="text-sm text-gray-600">
+                                <strong>钱包地址:</strong> ${monitor.wallet_address || 'N/A'}<br>
+                                <strong>最后检查:</strong> ${monitor.last_checked || monitor.last_checked_at || 'N/A'}
+                            </p>
+                        </div>
+                    `;
+                    
+                    alert('✅ 同步成功！请查看下方的余额数据。');
+                } else {
+                    balanceDiv.innerHTML = `
+                        <div class="bg-red-50 border border-red-200 rounded p-4">
+                            <p class="text-red-600 font-semibold">❌ 同步失败</p>
+                            <p class="text-red-500 mt-2">${data.message || '未知错误'}</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('测试失败:', error);
+                
+                responseDiv.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded p-4">
+                        <p class="text-red-600 font-semibold">❌ 请求失败</p>
+                        <p class="text-red-500 mt-2">${error.message}</p>
+                    </div>
+                `;
+                
+                balanceDiv.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded p-4">
+                        <p class="text-red-600">请求失败，请检查网络连接和 Token 是否有效。</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // 页面加载时自动加载 Token
+        window.onload = function() {
+            loadToken();
+        };
+    </script>
+</body>
+</html>
+

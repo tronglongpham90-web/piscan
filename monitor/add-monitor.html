@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>添加监控 - PiExplorer</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>添加监控 - PiExplorer v2.0</title>
     <link rel="icon" href="/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -281,8 +284,9 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'https://api.piexplorer.online';
-        
+        const API_BASE_URL = 'http://43.163.239.222';
+        const VERCEL_BYPASS_TOKEN = 'q9Ad6yNz2v787XKcQ1uE0Q8H0NxNddZW';
+
         // 检查登录状态
         function checkAuth() {
             const token = localStorage.getItem('token');
@@ -312,30 +316,68 @@
         // 表单提交
         document.getElementById('add-monitor-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const submitBtn = document.getElementById('submit-btn');
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 添加中...';
-            
+            submitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 正在验证钱包地址...';
+
             const formData = {
-                walletAddress: document.getElementById('wallet-address').value,
-                monitorName: document.getElementById('monitor-name').value,
-                frequency: document.querySelector('input[name="frequency"]:checked').value,
-                notifyAll: document.getElementById('notify-all').checked
+                wallet_address: document.getElementById('wallet-address').value.trim(),
+                nickname: document.getElementById('monitor-name').value.trim(),
+                network: 'mainnet'
             };
-            
+
             try {
-                // TODO: 调用后端 API 添加监控
+                // 获取 token
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('请先登录');
+                    window.location.href = '/auth/login.html';
+                    return;
+                }
+
+                // 调用后端 API 添加监控
                 console.log('添加监控:', formData);
-                
-                // 模拟 API 调用
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                alert('监控添加成功！');
-                window.location.href = '/monitor/dashboard.html';
+                submitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 正在获取余额...';
+
+                const response = await fetch(`${API_BASE_URL}/api/monitor?action=create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // 显示成功信息
+                    alert(`✅ 监控添加成功！\n\n钱包地址: ${formData.wallet_address}`);
+                    window.location.href = '/monitor/dashboard.html';
+                } else {
+                    // 显示错误信息
+                    let errorMsg = data.message || '添加失败';
+
+                    // 针对不同错误类型显示友好提示
+                    if (data.error === 'ACCOUNT_NOT_FOUND') {
+                        errorMsg = '❌ 钱包地址不存在或未激活\n\n请确认：\n1. 地址格式正确（56个字符，G开头）\n2. 钱包已在 Pi Network 上激活';
+                    } else if (data.error === 'TIMEOUT') {
+                        errorMsg = '⏱️ Pi Network API 请求超时\n\n请稍后重试';
+                    } else if (data.error === 'NETWORK_ERROR') {
+                        errorMsg = '🌐 无法连接到 Pi Network API\n\n请检查网络连接';
+                    } else if (data.currentCount !== undefined && data.limit !== undefined) {
+                        errorMsg = `⚠️ ${errorMsg}\n\n当前监控数: ${data.currentCount}/${data.limit}\n会员类型: ${data.membershipType}\n\n升级会员可增加监控数量`;
+                    }
+
+                    alert(errorMsg);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
             } catch (error) {
-                alert('添加失败: ' + error.message);
+                console.error('添加监控失败:', error);
+                alert('❌ 添加失败\n\n' + (error.message || '网络错误，请稍后重试'));
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
             }

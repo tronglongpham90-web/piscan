@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>监控详情 - PiExplorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center">
+                        <span class="text-2xl font-bold text-purple-600">PiExplorer</span>
+                    </a>
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="/monitor/dashboard.html" class="text-gray-600 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-chart-line mr-2"></i>监控中心
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="text-sm text-gray-600 mr-4" id="user-email"></span>
+                    <button id="logout-btn" class="text-sm text-gray-600 hover:text-purple-600">
+                        <i class="fas fa-sign-out-alt mr-1"></i>退出
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 返回按钮 -->
+        <div class="mb-6">
+            <a href="/monitor/dashboard.html" class="inline-flex items-center text-purple-600 hover:text-purple-700">
+                <i class="fas fa-arrow-left mr-2"></i>
+                返回监控列表
+            </a>
+        </div>
+
+        <!-- 加载状态 -->
+        <div id="loading-state" class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            <p class="mt-4 text-gray-600">加载中...</p>
+        </div>
+
+        <!-- 监控详情 -->
+        <div id="detail-content" class="hidden">
+            <!-- 基本信息卡片 -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <div class="flex items-start justify-between mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900" id="monitor-name">监控名称</h1>
+                        <p class="text-sm text-gray-500 mt-1" id="wallet-address">钱包地址</p>
+                    </div>
+                    <span id="status-badge" class="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">
+                        ✓ 正常
+                    </span>
+                </div>
+
+                <!-- 余额概览 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg">
+                        <p class="text-sm text-purple-600 mb-1">总余额</p>
+                        <p class="text-2xl font-bold text-purple-900" id="current-balance">0 π</p>
+                        <p class="text-xs text-purple-600 mt-1" id="balance-change">0 π</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
+                        <p class="text-sm text-blue-600 mb-1">主网余额</p>
+                        <p class="text-2xl font-bold text-blue-900" id="mainnet-total">0 π</p>
+                        <p class="text-xs text-blue-600 mt-1">
+                            可用: <span id="mainnet-available">0</span> π |
+                            锁定: <span id="mainnet-locked">0</span> π
+                        </p>
+                    </div>
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg">
+                        <p class="text-sm text-green-600 mb-1">测试网余额</p>
+                        <p class="text-2xl font-bold text-green-900" id="testnet-total">0 π</p>
+                        <p class="text-xs text-green-600 mt-1">
+                            可用: <span id="testnet-available">0</span> π
+                        </p>
+                    </div>
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">检查频率</p>
+                        <p class="text-lg font-semibold text-gray-900" id="frequency">每天</p>
+                        <p class="text-xs text-gray-600 mt-1">最后检查</p>
+                        <p class="text-sm font-medium text-gray-900" id="last-checked">未检查</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-3">通知设置</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">通知所有变化</p>
+                            <p class="text-sm font-medium text-gray-900" id="notify-all">是</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">增加阈值</p>
+                            <p class="text-sm font-medium text-gray-900" id="threshold-increase">未设置</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">减少阈值</p>
+                            <p class="text-sm font-medium text-gray-900" id="threshold-decrease">未设置</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 余额历史 -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">余额历史</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">时间</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">余额</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">变化</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody" class="bg-white divide-y divide-gray-200">
+                            <!-- 动态填充 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="no-history" class="hidden text-center py-8 text-gray-500">
+                    暂无历史记录
+                </div>
+            </div>
+
+            <!-- 相关通知 -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">相关通知</h2>
+                <div id="notifications-list">
+                    <!-- 动态填充 -->
+                </div>
+                <div id="no-notifications" class="hidden text-center py-8 text-gray-500">
+                    暂无通知
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://43.163.239.222';
+        const VERCEL_BYPASS_TOKEN = 'q9Ad6yNz2v787XKcQ1uE0Q8H0NxNddZW';
+
+        // 检查登录状态
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const userEmail = localStorage.getItem('userEmail');
+            
+            if (!token || !userEmail) {
+                window.location.href = '/auth/login.html';
+                return false;
+            }
+            
+            document.getElementById('user-email').textContent = userEmail;
+            return true;
+        }
+
+        // 退出登录
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = '/auth/login.html';
+        });
+
+        // 获取监控 ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const monitorId = urlParams.get('id');
+
+        if (!monitorId) {
+            alert('监控 ID 不存在');
+            window.location.href = '/monitor/dashboard.html';
+        }
+
+        // 加载监控详情
+        async function loadMonitorDetail() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('请先登录');
+                    window.location.href = '/auth/login.html';
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/api/monitor/detail?id=${monitorId}&x-vercel-protection-bypass=${VERCEL_BYPASS_TOKEN}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'x-vercel-protection-bypass': VERCEL_BYPASS_TOKEN
+                    }
+                });
+
+                const data = await response.json();
+
+                document.getElementById('loading-state').classList.add('hidden');
+
+                if (!data.success) {
+                    throw new Error(data.message || '获取监控详情失败');
+                }
+
+                const monitor = data.data.monitor;
+                const records = data.data.records || [];
+                const notifications = data.data.notifications || [];
+
+                // 显示基本信息
+                document.getElementById('monitor-name').textContent = monitor.monitorName || '未命名监控';
+                document.getElementById('wallet-address').textContent = monitor.walletAddress;
+                document.getElementById('current-balance').textContent = parseFloat(monitor.currentBalance).toFixed(2) + ' π';
+
+                const balanceChange = parseFloat(monitor.balanceChange);
+                const balanceChangeText = balanceChange > 0 ? `+${balanceChange.toFixed(2)}` : balanceChange.toFixed(2);
+                const balanceChangeColor = balanceChange > 0 ? 'text-green-600' : (balanceChange < 0 ? 'text-red-600' : 'text-gray-600');
+                document.getElementById('balance-change').textContent = balanceChangeText + ' π';
+                document.getElementById('balance-change').className = `text-xs ${balanceChangeColor}`;
+
+                // 显示主网余额
+                document.getElementById('mainnet-total').textContent = parseFloat(monitor.mainnet.total).toFixed(2) + ' π';
+                document.getElementById('mainnet-available').textContent = parseFloat(monitor.mainnet.available).toFixed(2);
+                document.getElementById('mainnet-locked').textContent = parseFloat(monitor.mainnet.locked).toFixed(2);
+
+                // 显示测试网余额
+                document.getElementById('testnet-total').textContent = parseFloat(monitor.testnet.total).toFixed(2) + ' π';
+                document.getElementById('testnet-available').textContent = parseFloat(monitor.testnet.available).toFixed(2);
+
+                document.getElementById('frequency').textContent = getFrequencyName(monitor.frequency);
+                document.getElementById('last-checked').textContent = monitor.lastCheckedAt
+                    ? new Date(monitor.lastCheckedAt).toLocaleString('zh-CN')
+                    : '未检查';
+                
+                document.getElementById('notify-all').textContent = monitor.notifyAll ? '是' : '否';
+                document.getElementById('threshold-increase').textContent = monitor.thresholdIncrease 
+                    ? `${monitor.thresholdIncrease} π` 
+                    : '未设置';
+                document.getElementById('threshold-decrease').textContent = monitor.thresholdDecrease 
+                    ? `${monitor.thresholdDecrease} π` 
+                    : '未设置';
+
+                // 状态徽章
+                const statusBadge = document.getElementById('status-badge');
+                if (monitor.status === 'active') {
+                    statusBadge.className = 'px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800';
+                    statusBadge.textContent = '✓ 正常';
+                } else {
+                    statusBadge.className = 'px-3 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800';
+                    statusBadge.textContent = '已暂停';
+                }
+
+                // 显示余额历史
+                if (records.length > 0) {
+                    renderHistory(records);
+                } else {
+                    document.getElementById('no-history').classList.remove('hidden');
+                }
+
+                // 显示通知
+                if (notifications.length > 0) {
+                    renderNotifications(notifications);
+                } else {
+                    document.getElementById('no-notifications').classList.remove('hidden');
+                }
+
+                document.getElementById('detail-content').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('加载监控详情失败:', error);
+                document.getElementById('loading-state').classList.add('hidden');
+                alert('加载监控详情失败: ' + error.message);
+                window.location.href = '/monitor/dashboard.html';
+            }
+        }
+
+        // 渲染余额历史
+        function renderHistory(records) {
+            const tbody = document.getElementById('history-tbody');
+            tbody.innerHTML = '';
+
+            records.forEach(record => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+
+                const change = parseFloat(record.balanceChange);
+                const changeText = change > 0 ? `+${change.toFixed(2)}` : change.toFixed(2);
+                const changeColor = change > 0 ? 'text-green-600' : (change < 0 ? 'text-red-600' : 'text-gray-600');
+
+                row.innerHTML = `
+                    <td class="px-6 py-4 text-sm text-gray-500">
+                        ${new Date(record.checkedAt).toLocaleString('zh-CN')}
+                    </td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                        ${parseFloat(record.balance).toFixed(2)} π
+                    </td>
+                    <td class="px-6 py-4 text-sm font-medium ${changeColor}">
+                        ${changeText} π
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
+        // 渲染通知
+        function renderNotifications(notifications) {
+            const list = document.getElementById('notifications-list');
+            list.innerHTML = '';
+
+            notifications.forEach(notif => {
+                const div = document.createElement('div');
+                div.className = 'border-b border-gray-200 py-4 last:border-b-0';
+
+                div.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <h4 class="text-sm font-semibold text-gray-900">${notif.title || '通知'}</h4>
+                            <p class="text-sm text-gray-600 mt-1">${notif.message}</p>
+                            <p class="text-xs text-gray-400 mt-2">
+                                ${new Date(notif.createdAt).toLocaleString('zh-CN')}
+                            </p>
+                        </div>
+                        ${!notif.isRead ? '<span class="ml-2 w-2 h-2 bg-purple-600 rounded-full"></span>' : ''}
+                    </div>
+                `;
+
+                list.appendChild(div);
+            });
+        }
+
+        // 获取频率名称
+        function getFrequencyName(frequency) {
+            const map = {
+                'hourly': '每小时',
+                'daily': '每天',
+                'weekly': '每周'
+            };
+            return map[frequency] || frequency;
+        }
+
+        // 页面加载
+        if (checkAuth()) {
+            loadMonitorDetail();
+        }
+    </script>
+</body>
+</html>
+

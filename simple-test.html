@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>简单测试</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #0f0; }
+        button { padding: 10px 20px; margin: 10px; font-size: 16px; cursor: pointer; }
+        pre { background: #000; padding: 15px; border: 1px solid #0f0; overflow: auto; }
+        .section { margin: 20px 0; padding: 15px; border: 2px solid #0f0; }
+        h2 { color: #0ff; }
+    </style>
+</head>
+<body>
+    <h1>🔍 API 测试工具</h1>
+    
+    <div class="section">
+        <h2>1. 获取监控列表</h2>
+        <button onclick="testGetMonitors()">📋 获取监控列表</button>
+        <pre id="monitors-result">点击按钮查看结果...</pre>
+    </div>
+    
+    <div class="section">
+        <h2>2. 同步余额</h2>
+        <input type="number" id="sync-id" placeholder="监控 ID" value="6" style="padding: 8px; font-size: 16px;">
+        <button onclick="testSync()">🔄 同步余额 (V2 API)</button>
+        <button onclick="testSyncOld()">🔄 同步余额 (旧 API)</button>
+        <pre id="sync-result">点击按钮查看结果...</pre>
+    </div>
+    
+    <div class="section">
+        <h2>3. 数据库调试</h2>
+        <button onclick="testDebug()">🐛 查看数据库信息</button>
+        <pre id="debug-result">点击按钮查看结果...</pre>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://43.163.239.222';
+        
+        function getToken() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('❌ 未找到 Token！请先登录。');
+                return null;
+            }
+            return token;
+        }
+        
+        async function testGetMonitors() {
+            const token = getToken();
+            if (!token) return;
+            
+            const resultDiv = document.getElementById('monitors-result');
+            resultDiv.textContent = '⏳ 正在请求...';
+            
+            try {
+                const url = `${API_BASE_URL}/api/monitor?action=list`;
+                console.log('请求 URL:', url);
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('响应状态:', response.status);
+                const data = await response.json();
+                console.log('响应数据:', data);
+                
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+                
+                // 如果成功，显示监控数量
+                if (data.success && data.data) {
+                    alert(`✅ 成功获取 ${data.data.length} 个监控`);
+                }
+            } catch (error) {
+                console.error('错误:', error);
+                resultDiv.textContent = `❌ 错误: ${error.message}\n\n${error.stack}`;
+            }
+        }
+        
+        async function testSync() {
+            const token = getToken();
+            if (!token) return;
+
+            const monitorId = document.getElementById('sync-id').value;
+            if (!monitorId) {
+                alert('请输入监控 ID');
+                return;
+            }
+
+            const resultDiv = document.getElementById('sync-result');
+            resultDiv.textContent = '⏳ 正在同步...';
+
+            try {
+                const url = `${API_BASE_URL}/api/monitor-sync-v2?id=${monitorId}`;
+                console.log('请求 URL (V2):', url);
+                console.log('Token:', token);
+
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('响应状态:', response.status);
+                console.log('响应头:', [...response.headers.entries()]);
+
+                const responseText = await response.text();
+                console.log('原始响应:', responseText);
+
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    console.error('JSON 解析失败:', e);
+                    resultDiv.textContent = `❌ 响应不是有效的 JSON:\n\n${responseText}`;
+                    return;
+                }
+
+                console.log('响应数据:', data);
+
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+
+                if (data.success) {
+                    // 检查是否包含详细字段
+                    const hasDetails = data.data &&
+                                      'mainnet_available' in data.data &&
+                                      'testnet_available' in data.data;
+
+                    if (hasDetails) {
+                        alert(`✅ 同步成功！\n\n` +
+                              `主网可用: ${data.data.mainnet_available} π\n` +
+                              `主网锁定: ${data.data.mainnet_locked} π\n` +
+                              `测试网可用: ${data.data.testnet_available} π\n` +
+                              `测试网锁定: ${data.data.testnet_locked} π\n\n` +
+                              `API 版本: ${data.data.api_version || '未知'}`);
+
+                        // 同步成功后，重新获取监控列表
+                        setTimeout(() => {
+                            testGetMonitors();
+                        }, 1000);
+                    } else {
+                        alert('⚠️ 同步成功，但返回数据缺少详细字段！\n请查看下方的 JSON 数据。');
+                    }
+                } else {
+                    alert(`❌ 同步失败: ${data.message || JSON.stringify(data)}`);
+                }
+            } catch (error) {
+                console.error('错误:', error);
+                alert(`❌ 请求错误: ${error.message}`);
+                resultDiv.textContent = `❌ 错误: ${error.message}\n\n${error.stack}`;
+            }
+        }
+        
+        async function testSyncOld() {
+            const token = getToken();
+            if (!token) return;
+
+            const monitorId = document.getElementById('sync-id').value;
+            if (!monitorId) {
+                alert('请输入监控 ID');
+                return;
+            }
+
+            const resultDiv = document.getElementById('sync-result');
+            resultDiv.textContent = '⏳ 正在同步（旧 API）...';
+
+            try {
+                const url = `${API_BASE_URL}/api/monitor-sync?action=sync-one&id=${monitorId}`;
+                console.log('请求 URL (旧 API):', url);
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                console.log('旧 API 响应:', data);
+
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+
+                if (data.success) {
+                    alert(`✅ 旧 API 同步成功！\n\n余额: ${data.data.new_balance} π`);
+                } else {
+                    alert(`❌ 旧 API 同步失败: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('错误:', error);
+                alert(`❌ 请求错误: ${error.message}`);
+                resultDiv.textContent = `❌ 错误: ${error.message}`;
+            }
+        }
+
+        async function testDebug() {
+            const token = getToken();
+            if (!token) return;
+            
+            const resultDiv = document.getElementById('debug-result');
+            resultDiv.textContent = '⏳ 正在查询...';
+            
+            try {
+                const url = `${API_BASE_URL}/api/debug-monitors`;
+                console.log('请求 URL:', url);
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('响应状态:', response.status);
+                const data = await response.json();
+                console.log('响应数据:', data);
+                
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+                
+                if (data.success && data.debug_info) {
+                    const info = data.debug_info;
+                    alert(`✅ 调试信息:\n\n` +
+                          `用户 ID: ${info.token_decoded.userId}\n` +
+                          `用户名: ${info.token_decoded.username}\n` +
+                          `所有监控数: ${info.all_monitors_count}\n` +
+                          `用户监控数: ${info.user_monitors_count}`);
+                }
+            } catch (error) {
+                console.error('错误:', error);
+                resultDiv.textContent = `❌ 错误: ${error.message}\n\n${error.stack}`;
+            }
+        }
+        
+        // 页面加载时自动测试
+        window.onload = function() {
+            console.log('页面已加载');
+            console.log('Token 存在:', !!localStorage.getItem('token'));
+        };
+    </script>
+</body>
+</html>
+

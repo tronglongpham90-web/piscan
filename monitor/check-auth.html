@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>认证检查</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold mb-4">🔍 认证状态检查</h1>
+        
+        <div class="bg-white rounded-lg shadow p-6 mb-4">
+            <h2 class="text-lg font-semibold mb-2">Token 状态</h2>
+            <div id="tokenStatus" class="space-y-2"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold mb-2">操作</h2>
+            <div class="space-x-2">
+                <button onclick="goToLogin()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    去登录
+                </button>
+                <button onclick="clearToken()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    清除 Token
+                </button>
+                <button onclick="location.reload()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                    刷新检查
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tokenStatus = document.getElementById('tokenStatus');
+
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+
+            let html = '';
+
+            if (!token) {
+                html += '<div class="text-red-600 font-bold">❌ 未找到登录 Token</div>';
+                html += '<div class="text-sm text-gray-600">你需要先登录才能使用监控功能</div>';
+            } else {
+                html += '<div class="text-green-600 font-bold">✅ 找到 Token</div>';
+                html += `<div class="text-xs text-gray-600 break-all">Token: ${token.substring(0, 50)}...</div>`;
+                
+                // 尝试解析 JWT
+                try {
+                    const parts = token.split('.');
+                    if (parts.length === 3) {
+                        const payload = JSON.parse(atob(parts[1]));
+                        html += '<div class="mt-2 text-sm">';
+                        html += '<div class="font-semibold">Token 内容:</div>';
+                        html += `<pre class="bg-gray-100 p-2 rounded text-xs">${JSON.stringify(payload, null, 2)}</pre>`;
+                        
+                        // 检查过期时间
+                        if (payload.exp) {
+                            const expDate = new Date(payload.exp * 1000);
+                            const now = new Date();
+                            if (expDate < now) {
+                                html += '<div class="text-red-600 mt-2">⚠️ Token 已过期！</div>';
+                                html += `<div class="text-sm text-gray-600">过期时间: ${expDate.toLocaleString()}</div>`;
+                            } else {
+                                html += '<div class="text-green-600 mt-2">✅ Token 仍然有效</div>';
+                                html += `<div class="text-sm text-gray-600">过期时间: ${expDate.toLocaleString()}</div>`;
+                            }
+                        }
+                        html += '</div>';
+                    }
+                } catch (e) {
+                    html += '<div class="text-yellow-600 mt-2">⚠️ 无法解析 Token (可能格式不正确)</div>';
+                }
+            }
+
+            if (user) {
+                html += '<div class="mt-4">';
+                html += '<div class="text-green-600 font-bold">✅ 找到用户信息</div>';
+                html += `<pre class="bg-gray-100 p-2 rounded text-xs mt-2">${user}</pre>`;
+                html += '</div>';
+            } else {
+                html += '<div class="mt-4 text-yellow-600">⚠️ 未找到用户信息</div>';
+            }
+
+            tokenStatus.innerHTML = html;
+        }
+
+        function goToLogin() {
+            window.location.href = '/auth/login.html';
+        }
+
+        function clearToken() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            alert('Token 已清除');
+            location.reload();
+        }
+
+        // 页面加载时检查
+        checkAuth();
+    </script>
+</body>
+</html>
+

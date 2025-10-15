@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-4">API 连接测试</h1>
+        
+        <div class="bg-white rounded-lg shadow p-6 mb-4">
+            <h2 class="text-lg font-semibold mb-2">测试结果</h2>
+            <div id="results" class="space-y-2"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold mb-2">详细日志</h2>
+            <pre id="logs" class="bg-gray-100 p-4 rounded text-xs overflow-auto max-h-96"></pre>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://43.163.239.222';
+        const VERCEL_BYPASS_TOKEN = 'q9Ad6yNz2v787XKcQ1uE0Q8H0NxNddZW';
+        
+        const results = document.getElementById('results');
+        const logs = document.getElementById('logs');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'text-red-600' : type === 'success' ? 'text-green-600' : 'text-blue-600';
+            
+            results.innerHTML += `<div class="${color}">[${timestamp}] ${message}</div>`;
+            logs.textContent += `[${timestamp}] ${message}\n`;
+            
+            console.log(message);
+        }
+
+        async function testAPI() {
+            log('开始测试 API 连接...', 'info');
+            
+            // 测试 1: 健康检查（不需要 token）
+            try {
+                log('测试 1: 健康检查 API', 'info');
+                const url = `${API_BASE_URL}/api/health?x-vercel-protection-bypass=${VERCEL_BYPASS_TOKEN}`;
+                log(`请求 URL: ${url}`, 'info');
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'x-vercel-protection-bypass': VERCEL_BYPASS_TOKEN
+                    }
+                });
+                
+                log(`响应状态: ${response.status} ${response.statusText}`, 'info');
+                
+                const data = await response.json();
+                log(`响应数据: ${JSON.stringify(data, null, 2)}`, 'success');
+                
+                if (data.status === 'healthy') {
+                    log('✅ 健康检查通过！', 'success');
+                } else {
+                    log('❌ 健康检查失败', 'error');
+                }
+            } catch (error) {
+                log(`❌ 健康检查错误: ${error.message}`, 'error');
+                log(`错误详情: ${error.stack}`, 'error');
+            }
+            
+            // 测试 2: 监控列表（需要 token）
+            try {
+                log('\n测试 2: 监控列表 API', 'info');
+                
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    log('⚠️  未找到登录 token，跳过此测试', 'info');
+                    log('请先登录: https://piexplorer.online/auth/login', 'info');
+                    return;
+                }
+                
+                log(`使用 token: ${token.substring(0, 20)}...`, 'info');
+                
+                const url = `${API_BASE_URL}/api/monitor/list?x-vercel-protection-bypass=${VERCEL_BYPASS_TOKEN}`;
+                log(`请求 URL: ${url}`, 'info');
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'x-vercel-protection-bypass': VERCEL_BYPASS_TOKEN
+                    }
+                });
+                
+                log(`响应状态: ${response.status} ${response.statusText}`, 'info');
+                
+                const data = await response.json();
+                log(`响应数据: ${JSON.stringify(data, null, 2)}`, 'info');
+                
+                if (data.success) {
+                    log(`✅ 监控列表获取成功！监控数量: ${data.data.monitors.length}`, 'success');
+                } else {
+                    log(`❌ 监控列表获取失败: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ 监控列表错误: ${error.message}`, 'error');
+                log(`错误详情: ${error.stack}`, 'error');
+            }
+        }
+
+        // 页面加载后自动测试
+        window.addEventListener('DOMContentLoaded', () => {
+            log('页面加载完成', 'info');
+            log(`API 基础 URL: ${API_BASE_URL}`, 'info');
+            log(`Bypass Token: ${VERCEL_BYPASS_TOKEN.substring(0, 10)}...`, 'info');
+            log('', 'info');
+            
+            testAPI();
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token 调试 - PiExplorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-2xl font-bold mb-6">🔍 Token 调试工具</h1>
+            
+            <div class="space-y-4">
+                <!-- Token 状态 -->
+                <div class="border rounded p-4">
+                    <h2 class="font-semibold mb-2">📋 LocalStorage 状态</h2>
+                    <div id="storage-info" class="space-y-2 text-sm font-mono"></div>
+                </div>
+
+                <!-- Token 解码 -->
+                <div class="border rounded p-4">
+                    <h2 class="font-semibold mb-2">🔓 Token 解码</h2>
+                    <div id="token-decode" class="space-y-2 text-sm"></div>
+                </div>
+
+                <!-- API 测试 -->
+                <div class="border rounded p-4">
+                    <h2 class="font-semibold mb-2">🧪 API 连接测试</h2>
+                    <button onclick="testAPI()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                        测试 API 连接
+                    </button>
+                    <div id="api-result" class="mt-4 text-sm"></div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="border rounded p-4">
+                    <h2 class="font-semibold mb-2">🛠️ 操作</h2>
+                    <div class="space-x-2">
+                        <button onclick="clearStorage()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                            清除所有数据
+                        </button>
+                        <button onclick="location.href='/auth/login.html'" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                            重新登录
+                        </button>
+                        <button onclick="location.reload()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                            刷新页面
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://43.163.239.222';
+
+        // 显示 localStorage 信息
+        function displayStorageInfo() {
+            const storageDiv = document.getElementById('storage-info');
+            const token = localStorage.getItem('token');
+            const userEmail = localStorage.getItem('userEmail');
+            const userId = localStorage.getItem('userId');
+            const user = localStorage.getItem('user');
+
+            let html = '';
+            html += `<div><strong>Token:</strong> ${token ? '✅ 存在 (' + token.substring(0, 20) + '...)' : '❌ 不存在'}</div>`;
+            html += `<div><strong>User Email:</strong> ${userEmail || '❌ 不存在'}</div>`;
+            html += `<div><strong>User ID:</strong> ${userId || '❌ 不存在'}</div>`;
+            html += `<div><strong>User Object:</strong> ${user ? '✅ 存在' : '❌ 不存在'}</div>`;
+
+            storageDiv.innerHTML = html;
+        }
+
+        // 解码 JWT Token
+        function decodeToken() {
+            const decodeDiv = document.getElementById('token-decode');
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                decodeDiv.innerHTML = '<div class="text-red-600">❌ 没有找到 Token</div>';
+                return;
+            }
+
+            try {
+                // JWT 格式: header.payload.signature
+                const parts = token.split('.');
+                if (parts.length !== 3) {
+                    decodeDiv.innerHTML = '<div class="text-red-600">❌ Token 格式错误</div>';
+                    return;
+                }
+
+                // 解码 payload (Base64)
+                const payload = JSON.parse(atob(parts[1]));
+                
+                // 检查过期时间
+                const now = Math.floor(Date.now() / 1000);
+                const isExpired = payload.exp && payload.exp < now;
+                const expiresAt = payload.exp ? new Date(payload.exp * 1000).toLocaleString('zh-CN') : '未知';
+                const issuedAt = payload.iat ? new Date(payload.iat * 1000).toLocaleString('zh-CN') : '未知';
+
+                let html = '<div class="space-y-1">';
+                html += `<div><strong>用户 ID:</strong> ${payload.userId || payload.id || '未知'}</div>`;
+                html += `<div><strong>签发时间:</strong> ${issuedAt}</div>`;
+                html += `<div><strong>过期时间:</strong> ${expiresAt}</div>`;
+                html += `<div><strong>状态:</strong> ${isExpired ? '<span class="text-red-600">❌ 已过期</span>' : '<span class="text-green-600">✅ 有效</span>'}</div>`;
+                html += `<div class="mt-2"><strong>完整载荷:</strong><pre class="bg-gray-100 p-2 rounded mt-1">${JSON.stringify(payload, null, 2)}</pre></div>`;
+                html += '</div>';
+
+                decodeDiv.innerHTML = html;
+            } catch (error) {
+                decodeDiv.innerHTML = `<div class="text-red-600">❌ 解码失败: ${error.message}</div>`;
+            }
+        }
+
+        // 测试 API 连接
+        async function testAPI() {
+            const resultDiv = document.getElementById('api-result');
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                resultDiv.innerHTML = '<div class="text-red-600">❌ 没有 Token，无法测试</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="text-blue-600">⏳ 正在测试...</div>';
+
+            try {
+                // 测试监控列表 API
+                const response = await fetch(`${API_BASE_URL}/api/monitor?action=list`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                let html = '<div class="space-y-2">';
+                html += `<div><strong>HTTP 状态:</strong> ${response.status} ${response.statusText}</div>`;
+                html += `<div><strong>响应:</strong></div>`;
+                html += `<pre class="bg-gray-100 p-2 rounded overflow-auto">${JSON.stringify(data, null, 2)}</pre>`;
+                html += '</div>';
+
+                if (response.status === 401) {
+                    html += '<div class="mt-4 p-4 bg-red-100 border border-red-400 rounded">';
+                    html += '<strong>❌ Token 验证失败</strong><br>';
+                    html += '可能的原因：<br>';
+                    html += '1. Token 已过期（超过 7 天）<br>';
+                    html += '2. JWT_SECRET 不匹配<br>';
+                    html += '3. Token 格式错误<br>';
+                    html += '<br><strong>建议：</strong>点击下方"清除所有数据"按钮，然后重新登录';
+                    html += '</div>';
+                } else if (response.status === 200) {
+                    html += '<div class="mt-4 p-4 bg-green-100 border border-green-400 rounded">';
+                    html += '<strong>✅ API 连接正常</strong><br>';
+                    html += `监控数量: ${data.data ? data.data.length : 0}`;
+                    html += '</div>';
+                }
+
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="text-red-600">❌ 请求失败: ${error.message}</div>`;
+            }
+        }
+
+        // 清除所有数据
+        function clearStorage() {
+            if (confirm('确定要清除所有本地数据吗？\n\n清除后需要重新登录。')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                alert('✅ 已清除所有数据');
+                location.reload();
+            }
+        }
+
+        // 页面加载时执行
+        window.onload = function() {
+            displayStorageInfo();
+            decodeToken();
+        };
+    </script>
+</body>
+</html>
+

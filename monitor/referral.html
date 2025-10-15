@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推荐返现 - PiExplorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+        <!-- 侧边栏 -->
+        <aside class="w-64 bg-white shadow-lg">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-purple-600">PiExplorer</h1>
+                <p class="text-sm text-gray-500 mt-1">钱包监控系统</p>
+            </div>
+            
+            <nav class="mt-6">
+                <a href="/monitor/dashboard.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">📊</span>
+                    <span>仪表板</span>
+                </a>
+                <a href="/monitor/add-monitor.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">➕</span>
+                    <span>添加监控</span>
+                </a>
+                <a href="/monitor/notifications.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">🔔</span>
+                    <span>通知历史</span>
+                </a>
+                <a href="/monitor/referral.html" class="flex items-center px-6 py-3 bg-purple-50 text-purple-600 border-r-4 border-purple-600">
+                    <span class="text-xl mr-3">💰</span>
+                    <span>推荐返现</span>
+                </a>
+                <a href="/monitor/settings.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">⚙️</span>
+                    <span>账户设置</span>
+                </a>
+                <a href="/monitor/social-tasks.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">🎯</span>
+                    <span>社交任务</span>
+                </a>
+                <a href="/monitor/upgrade.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                    <span class="text-xl mr-3">⭐</span>
+                    <span>升级会员</span>
+                </a>
+            </nav>
+
+            <div class="absolute bottom-0 w-64 p-6 border-t">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-900" id="user-email">用户</p>
+                        <p class="text-xs text-gray-500">免费版</p>
+                    </div>
+                    <button id="logout-btn" class="text-red-600 hover:text-red-700">
+                        <span class="text-xl">🚪</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="flex-1 p-8">
+            <div class="max-w-6xl mx-auto">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800">推荐返现</h2>
+                    <p class="text-gray-600 mt-2">邀请好友注册，获得丰厚奖励</p>
+                </div>
+
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+                        <p class="text-sm opacity-90">我的推荐码</p>
+                        <p class="text-3xl font-bold mt-2" id="referral-code">加载中...</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <p class="text-sm text-gray-500">已邀请人数</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-2" id="total-referrals">0</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <p class="text-sm text-gray-500">累计收益</p>
+                        <p class="text-3xl font-bold text-green-600 mt-2" id="total-earnings">¥0</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <p class="text-sm text-gray-500">可提现金额</p>
+                        <p class="text-3xl font-bold text-blue-600 mt-2" id="available-balance">¥0</p>
+                    </div>
+                </div>
+
+                <!-- 推荐链接 -->
+                <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">分享推荐链接</h3>
+                    <div class="flex items-center space-x-4">
+                        <input 
+                            type="text" 
+                            id="referral-link" 
+                            readonly 
+                            class="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
+                            value="https://piexplorer.online/auth/register?ref=LOADING"
+                        >
+                        <button onclick="copyLink()" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 whitespace-nowrap">
+                            📋 复制链接
+                        </button>
+                        <button onclick="shareToSocial()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap">
+                            📤 分享
+                        </button>
+                    </div>
+                    
+                    <!-- 奖励说明 -->
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-purple-50 rounded-lg p-4">
+                            <div class="text-2xl mb-2">🎁</div>
+                            <h4 class="font-semibold text-gray-900">注册奖励</h4>
+                            <p class="text-sm text-gray-600 mt-1">好友注册成功，您获得 <span class="font-bold text-purple-600">¥5</span></p>
+                        </div>
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <div class="text-2xl mb-2">💎</div>
+                            <h4 class="font-semibold text-gray-900">升级奖励</h4>
+                            <p class="text-sm text-gray-600 mt-1">好友升级会员，您获得 <span class="font-bold text-blue-600">10%</span> 返现</p>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-4">
+                            <div class="text-2xl mb-2">🔄</div>
+                            <h4 class="font-semibold text-gray-900">持续收益</h4>
+                            <p class="text-sm text-gray-600 mt-1">好友续费会员，您持续获得 <span class="font-bold text-green-600">5%</span> 返现</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 推荐记录 -->
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">推荐记录</h3>
+                        <button onclick="withdrawEarnings()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            💸 申请提现
+                        </button>
+                    </div>
+
+                    <!-- 加载状态 -->
+                    <div id="loading-state" class="text-center py-12">
+                        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                        <p class="mt-4 text-gray-600">加载中...</p>
+                    </div>
+
+                    <!-- 空状态 -->
+                    <div id="empty-state" class="hidden text-center py-12">
+                        <span class="text-6xl">👥</span>
+                        <p class="mt-4 text-xl font-semibold text-gray-700">还没有推荐记录</p>
+                        <p class="mt-2 text-gray-500">分享您的推荐链接，邀请好友加入</p>
+                    </div>
+
+                    <!-- 推荐列表 -->
+                    <div id="referral-list" class="hidden">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">用户</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">注册时间</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">会员类型</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">您的收益</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
+                                </tr>
+                            </thead>
+                            <tbody id="referral-tbody" class="bg-white divide-y divide-gray-200">
+                                <!-- 动态填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://43.163.239.222';
+        const VERCEL_BYPASS_TOKEN = 'q9Ad6yNz2v787XKcQ1uE0Q8H0NxNddZW';
+
+        // 检查登录状态
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const userEmail = localStorage.getItem('userEmail');
+            
+            if (!token || !userEmail) {
+                window.location.href = '/auth/login.html';
+                return false;
+            }
+            
+            document.getElementById('user-email').textContent = userEmail;
+            return true;
+        }
+
+        // 退出登录
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userEmail');
+            window.location.href = '/auth/login.html';
+        });
+
+        // 加载推荐数据
+        async function loadReferralData() {
+            if (!checkAuth()) return;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/api/referral?action=stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const stats = data.data;
+                    document.getElementById('referral-code').textContent = stats.referralCode;
+                    document.getElementById('total-referrals').textContent = stats.totalReferrals;
+                    document.getElementById('total-earnings').textContent = `¥${stats.totalEarnings.toFixed(2)}`;
+                    document.getElementById('available-balance').textContent = `¥${stats.availableBalance.toFixed(2)}`;
+                    
+                    const link = `https://piexplorer.online/auth/register?ref=${stats.referralCode}`;
+                    document.getElementById('referral-link').value = link;
+
+                    if (stats.referrals && stats.referrals.length > 0) {
+                        renderReferrals(stats.referrals);
+                        document.getElementById('referral-list').classList.remove('hidden');
+                    } else {
+                        document.getElementById('empty-state').classList.remove('hidden');
+                    }
+                }
+
+                document.getElementById('loading-state').classList.add('hidden');
+            } catch (error) {
+                console.error('加载推荐数据失败:', error);
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('empty-state').classList.remove('hidden');
+            }
+        }
+
+        // 渲染推荐列表
+        function renderReferrals(referrals) {
+            const tbody = document.getElementById('referral-tbody');
+            tbody.innerHTML = '';
+
+            referrals.forEach(ref => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-medium text-gray-900">${ref.email}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500">
+                        ${new Date(ref.registeredAt).toLocaleDateString('zh-CN')}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${getMembershipBadge(ref.membershipType)}">
+                            ${getMembershipName(ref.membershipType)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm font-semibold text-green-600">
+                        ¥${ref.earnings.toFixed(2)}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${ref.paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                            ${ref.paid ? '已结算' : '待结算'}
+                        </span>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // 获取会员徽章样式
+        function getMembershipBadge(type) {
+            const badges = {
+                'free': 'bg-gray-100 text-gray-800',
+                'social': 'bg-blue-100 text-blue-800',
+                'paid': 'bg-purple-100 text-purple-800'
+            };
+            return badges[type] || 'bg-gray-100 text-gray-800';
+        }
+
+        // 获取会员名称
+        function getMembershipName(type) {
+            const names = {
+                'free': '免费版',
+                'social': '社交任务版',
+                'paid': '付费版'
+            };
+            return names[type] || type;
+        }
+
+        // 复制链接
+        function copyLink() {
+            const input = document.getElementById('referral-link');
+            input.select();
+            document.execCommand('copy');
+            alert('✅ 推荐链接已复制到剪贴板！');
+        }
+
+        // 分享到社交媒体
+        function shareToSocial() {
+            const link = document.getElementById('referral-link').value;
+            const text = `加入 PiExplorer，监控您的 Pi 钱包余额变化！使用我的推荐链接注册：${link}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'PiExplorer 推荐',
+                    text: text,
+                    url: link
+                });
+            } else {
+                alert('您的浏览器不支持分享功能，请手动复制链接分享');
+            }
+        }
+
+        // 申请提现
+        async function withdrawEarnings() {
+            if (!confirm('确定要申请提现吗？')) return;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/api/referral?action=withdraw`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ 提现申请已提交，我们会在3个工作日内处理');
+                    loadReferralData();
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                console.error('提现失败:', error);
+                alert('❌ 提现失败，请稍后重试');
+            }
+        }
+
+        // 页面加载时执行
+        window.addEventListener('DOMContentLoaded', () => {
+            loadReferralData();
+        });
+    </script>
+</body>
+</html>
+

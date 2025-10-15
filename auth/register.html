@@ -148,7 +148,7 @@
 
     <script>
         // API 基础 URL
-        const API_BASE_URL = 'https://api.piexplorer.online';
+        const API_BASE_URL = 'http://43.163.239.222';
 
         // 从 URL 获取推荐码
         const urlParams = new URLSearchParams(window.location.search);
@@ -187,7 +187,7 @@
 
             try {
                 // 调用注册 API
-                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                const response = await fetch(`${API_BASE_URL}/api/auth?action=register`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

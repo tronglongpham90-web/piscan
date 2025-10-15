@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>获取监控列表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">获取监控列表</h1>
+        
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <button onclick="loadMonitors()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-semibold">
+                📋 获取我的监控列表
+            </button>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">监控列表</h2>
+            <div id="monitorList" class="space-y-4">
+                <p class="text-gray-500">点击上方按钮获取监控列表...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE_URL = 'http://43.163.239.222';
+        
+        async function loadMonitors() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('❌ 未找到 Token，请先登录');
+                window.location.href = '/auth/login.html';
+                return;
+            }
+            
+            const listDiv = document.getElementById('monitorList');
+            listDiv.innerHTML = '<p class="text-blue-600">⏳ 正在加载...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/monitor`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                console.log('监控列表:', data);
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    let html = '';
+                    
+                    data.data.forEach(monitor => {
+                        const mainnetTotal = parseFloat(monitor.mainnet_total || 0);
+                        const testnetTotal = parseFloat(monitor.testnet_total || 0);
+                        const totalBalance = mainnetTotal + testnetTotal;
+                        
+                        html += `
+                            <div class="border rounded-lg p-4 bg-gray-50">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h3 class="font-bold text-lg">${monitor.name || '未命名'}</h3>
+                                        <p class="text-sm text-gray-600 font-mono">${monitor.wallet_address}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
+                                            ID: ${monitor.id}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-3 gap-3 mb-3">
+                                    <div class="bg-purple-50 p-3 rounded">
+                                        <p class="text-xs text-purple-600">总余额</p>
+                                        <p class="text-lg font-bold text-purple-900">${totalBalance.toFixed(2)} π</p>
+                                    </div>
+                                    <div class="bg-blue-50 p-3 rounded">
+                                        <p class="text-xs text-blue-600">主网</p>
+                                        <p class="text-lg font-bold text-blue-900">${mainnetTotal.toFixed(2)} π</p>
+                                    </div>
+                                    <div class="bg-green-50 p-3 rounded">
+                                        <p class="text-xs text-green-600">测试网</p>
+                                        <p class="text-lg font-bold text-green-900">${testnetTotal.toFixed(2)} π</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white p-3 rounded border">
+                                    <p class="text-xs text-gray-600 mb-2"><strong>主网详情:</strong></p>
+                                    <div class="grid grid-cols-2 gap-2 text-sm mb-2">
+                                        <div>可用: ${parseFloat(monitor.mainnet_available || 0).toFixed(2)} π</div>
+                                        <div>锁定: ${parseFloat(monitor.mainnet_locked || 0).toFixed(2)} π</div>
+                                    </div>
+                                    <p class="text-xs text-gray-600 mb-2"><strong>测试网详情:</strong></p>
+                                    <div class="grid grid-cols-2 gap-2 text-sm">
+                                        <div>可用: ${parseFloat(monitor.testnet_available || 0).toFixed(2)} π</div>
+                                        <div>锁定: ${parseFloat(monitor.testnet_locked || 0).toFixed(2)} π</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3 flex space-x-2">
+                                    <button onclick="syncMonitor(${monitor.id})" 
+                                        class="flex-1 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm font-semibold">
+                                        🔄 同步此监控
+                                    </button>
+                                    <button onclick="copyId(${monitor.id})" 
+                                        class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 text-sm font-semibold">
+                                        📋 复制 ID
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    listDiv.innerHTML = html;
+                } else {
+                    listDiv.innerHTML = `
+                        <div class="bg-yellow-50 border border-yellow-200 rounded p-4">
+                            <p class="text-yellow-800">📭 您还没有添加任何监控</p>
+                            <a href="/monitor/add-monitor.html" class="text-blue-600 hover:underline mt-2 inline-block">
+                                → 点击这里添加监控
+                            </a>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('加载失败:', error);
+                listDiv.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded p-4">
+                        <p class="text-red-600 font-semibold">❌ 加载失败</p>
+                        <p class="text-red-500 mt-2">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function syncMonitor(id) {
+            if (!confirm(`确定要同步监控 ID ${id} 吗？`)) {
+                return;
+            }
+            
+            const token = localStorage.getItem('token');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/monitor-sync?action=sync-one&id=${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                console.log('同步结果:', data);
+                
+                if (data.success) {
+                    alert('✅ 同步成功！正在刷新列表...');
+                    loadMonitors();
+                } else {
+                    alert('❌ 同步失败: ' + (data.message || '未知错误'));
+                }
+            } catch (error) {
+                alert('❌ 同步失败: ' + error.message);
+            }
+        }
+        
+        function copyId(id) {
+            navigator.clipboard.writeText(id.toString()).then(() => {
+                alert(`✅ 已复制 ID: ${id}`);
+            });
+        }
+        
+        // 页面加载时自动获取监控列表
+        window.onload = function() {
+            loadMonitors();
+        };
+    </script>
+</body>
+</html>
+

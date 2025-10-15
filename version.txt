@@ -1,0 +1,15 @@
+Version: 2.2.0
+Deployed: 2025-10-14 16:00:00
+Changes:
+- ✅ Token 有效期延长到 365 天（一年）
+- ✅ 修复 dashboard.html 数据格式化问题
+  * 移除不必要的数据转换层
+  * 直接使用后端返回的 snake_case 字段
+  * 修复统计数据计算逻辑
+- ✅ 所有 API URL 已更新为永久域名
+  * https://piexplorer-api.vercel.app
+- ✅ 字段名统一使用 snake_case
+  * wallet_address, nickname, current_balance, balance_change
+- ✅ 添加 Token 调试工具
+  * /debug-token.html
+

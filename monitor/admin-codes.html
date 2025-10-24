@@ -284,6 +284,60 @@
             display: none;
         }
 
+        /* 模态框样式 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-content h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .modal-content p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #bbb 0%, #999 100%);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(153, 153, 153, 0.4);
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 1.8rem;
@@ -356,9 +410,37 @@
             <button class="btn btn-success" onclick="refreshData()">
                 🔄 刷新数据
             </button>
+            <button class="btn btn-primary" onclick="showGenerateModal()">
+                ➕ 生成兑换码
+            </button>
             <button class="btn btn-danger" onclick="exportCodes()">
                 📥 导出兑换码
             </button>
+        </div>
+
+        <!-- 生成兑换码弹窗 -->
+        <div id="generateModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>🎫 生成新兑换码</h3>
+                <p>请输入要生成的兑换码数量（1-100）：</p>
+                <input type="number" id="generateCount" min="1" max="100" value="10" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px;">
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-success" onclick="generateCodes()" style="flex: 1;">
+                        ✅ 确认生成
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeGenerateModal()" style="flex: 1;">
+                        ❌ 取消
+                    </button>
+                </div>
+                <div id="generateResult" style="margin-top: 20px; display: none;">
+                    <h4>✅ 生成成功！</h4>
+                    <div id="generatedCodes" style="max-height: 300px; overflow-y: auto; background: #f5f5f5; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                    </div>
+                    <button class="btn btn-primary" onclick="copyAllCodes()" style="width: 100%; margin-top: 10px;">
+                        📋 复制所有兑换码
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- 搜索框 -->
@@ -519,6 +601,77 @@
             link.href = URL.createObjectURL(blob);
             link.download = `兑换码_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
+        }
+
+        // 显示生成兑换码弹窗
+        function showGenerateModal() {
+            document.getElementById('generateModal').style.display = 'flex';
+            document.getElementById('generateResult').style.display = 'none';
+            document.getElementById('generateCount').value = 10;
+        }
+
+        // 关闭生成兑换码弹窗
+        function closeGenerateModal() {
+            document.getElementById('generateModal').style.display = 'none';
+        }
+
+        // 生成兑换码
+        async function generateCodes() {
+            const count = parseInt(document.getElementById('generateCount').value);
+
+            if (count < 1 || count > 100) {
+                alert('数量必须在 1-100 之间');
+                return;
+            }
+
+            // 生成兑换码的函数
+            function generateCode() {
+                const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+                let code = '';
+                for (let i = 0; i < 16; i++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return code;
+            }
+
+            // 生成指定数量的兑换码
+            const newCodes = [];
+            for (let i = 0; i < count; i++) {
+                newCodes.push(generateCode());
+            }
+
+            // 显示生成的兑换码
+            const resultDiv = document.getElementById('generateResult');
+            const codesDiv = document.getElementById('generatedCodes');
+
+            codesDiv.innerHTML = newCodes.map((code, index) => `
+                <div style="padding: 8px; border-bottom: 1px solid #ddd; font-family: 'Courier New', monospace; font-weight: bold; color: #667eea;">
+                    ${index + 1}. ${code}
+                </div>
+            `).join('');
+
+            resultDiv.style.display = 'block';
+
+            // 保存到全局变量以便复制
+            window.generatedCodes = newCodes;
+
+            // 显示提示信息
+            alert(`✅ 已生成 ${count} 个兑换码！\n\n⚠️ 重要提示：\n1. 请复制这些兑换码并保存\n2. 然后运行以下命令将它们添加到数据库：\n\ncd /home/jzy/桌面/piscan/piexplorer-vercel-proxy\nexport $(cat .env | grep -v '^#' | xargs)\n\n然后手动将兑换码插入数据库，或者使用管理脚本。`);
+        }
+
+        // 复制所有生成的兑换码
+        function copyAllCodes() {
+            if (!window.generatedCodes || window.generatedCodes.length === 0) {
+                alert('没有可复制的兑换码');
+                return;
+            }
+
+            const codesText = window.generatedCodes.join('\n');
+            navigator.clipboard.writeText(codesText).then(() => {
+                alert(`✅ 已复制 ${window.generatedCodes.length} 个兑换码到剪贴板！\n\n下一步：\n1. 将这些兑换码保存到文件\n2. 运行命令将它们添加到数据库\n3. 运行 ./update-admin-codes.sh 更新网站数据`);
+            }).catch(err => {
+                alert('复制失败：' + err);
+            });
         }
 
         // 页面加载时检查登录状态

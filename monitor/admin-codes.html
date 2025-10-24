@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>兑换码管理后台 - PiExplorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .login-box {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 400px;
+            margin: 100px auto;
+        }
+
+        .login-box h2 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .login-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .login-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        th:first-child {
+            border-top-left-radius: 10px;
+        }
+
+        th:last-child {
+            border-top-right-radius: 10px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tr:hover {
+            background: #f8f9ff;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-used {
+            background: #fee;
+            color: #c33;
+        }
+
+        .status-available {
+            background: #efe;
+            color: #3c3;
+        }
+
+        .code-cell {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .copy-btn {
+            padding: 4px 8px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #764ba2;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录界面 -->
+    <div id="loginBox" class="login-box">
+        <h2>🔐 管理员登录</h2>
+        <input type="password" id="passwordInput" placeholder="请输入管理员密码" />
+        <button onclick="login()">登录</button>
+    </div>
+
+    <!-- 主界面 -->
+    <div id="mainContent" class="container hidden">
+        <div class="header">
+            <h1>🎁 兑换码管理后台</h1>
+            <p>PiExplorer Redemption Code Management System</p>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>总兑换码</h3>
+                <div class="value" id="totalCodes">-</div>
+                <div class="label">Total Codes</div>
+            </div>
+            <div class="stat-card">
+                <h3>已使用</h3>
+                <div class="value" id="usedCodes">-</div>
+                <div class="label">Used Codes</div>
+            </div>
+            <div class="stat-card">
+                <h3>未使用</h3>
+                <div class="value" id="availableCodes">-</div>
+                <div class="label">Available</div>
+            </div>
+            <div class="stat-card">
+                <h3>使用率</h3>
+                <div class="value" id="usageRate">-</div>
+                <div class="label">Usage Rate</div>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="actions">
+            <button class="btn btn-success" onclick="refreshData()">
+                🔄 刷新数据
+            </button>
+            <button class="btn btn-danger" onclick="exportCodes()">
+                📥 导出兑换码
+            </button>
+        </div>
+
+        <!-- 搜索框 -->
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 搜索兑换码或邮箱..." oninput="filterTable()" />
+        </div>
+
+        <!-- 兑换码列表 -->
+        <div class="table-container">
+            <table id="codesTable">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>兑换码</th>
+                        <th>状态</th>
+                        <th>使用者</th>
+                        <th>使用时间</th>
+                        <th>创建时间</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="6" class="loading">加载中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://piexplorer-api.vercel.app';
+        let allCodes = [];
+
+        // 登录
+        function login() {
+            const password = document.getElementById('passwordInput').value;
+            if (password === 'Jiang520') {
+                localStorage.setItem('adminToken', 'authenticated');
+                document.getElementById('loginBox').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                loadData();
+            } else {
+                alert('密码错误！');
+            }
+        }
+
+        // 检查登录状态
+        function checkAuth() {
+            if (localStorage.getItem('adminToken') === 'authenticated') {
+                document.getElementById('loginBox').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                loadData();
+            }
+        }
+
+        // 加载数据
+        async function loadData() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/redeem-codes`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    allCodes = data.codes || [];
+                    updateStats(data.stats);
+                    renderTable(allCodes);
+                } else {
+                    throw new Error(data.message || '加载失败');
+                }
+            } catch (error) {
+                console.error('加载失败:', error);
+                alert('加载数据失败，请检查网络连接');
+            }
+        }
+
+        // 更新统计
+        function updateStats(stats) {
+            document.getElementById('totalCodes').textContent = stats.total || 0;
+            document.getElementById('usedCodes').textContent = stats.used || 0;
+            document.getElementById('availableCodes').textContent = stats.unused || 0;
+            document.getElementById('usageRate').textContent = (stats.usageRate || 0) + '%';
+        }
+
+        // 渲染表格
+        function renderTable(codes) {
+            const tbody = document.getElementById('tableBody');
+            
+            if (codes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;">暂无数据</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = codes.map((code, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>
+                        <div class="code-cell">
+                            ${code.code}
+                            <button class="copy-btn" onclick="copyCode('${code.code}')">复制</button>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status-badge ${code.used ? 'status-used' : 'status-available'}">
+                            ${code.used ? '已使用' : '未使用'}
+                        </span>
+                    </td>
+                    <td>${code.used_by_email || '-'}</td>
+                    <td>${code.used_at ? new Date(code.used_at).toLocaleString('zh-CN') : '-'}</td>
+                    <td>${new Date(code.created_at).toLocaleString('zh-CN')}</td>
+                </tr>
+            `).join('');
+        }
+
+        // 过滤表格
+        function filterTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allCodes.filter(code => 
+                code.code.toLowerCase().includes(searchTerm) ||
+                (code.used_by_email && code.used_by_email.toLowerCase().includes(searchTerm))
+            );
+            renderTable(filtered);
+        }
+
+        // 复制兑换码
+        function copyCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                alert('兑换码已复制: ' + code);
+            });
+        }
+
+        // 刷新数据
+        function refreshData() {
+            loadData();
+        }
+
+        // 导出兑换码
+        function exportCodes() {
+            const csv = [
+                ['序号', '兑换码', '状态', '使用者', '使用时间', '创建时间'],
+                ...allCodes.map((code, index) => [
+                    index + 1,
+                    code.code,
+                    code.used ? '已使用' : '未使用',
+                    code.used_by_email || '-',
+                    code.used_at ? new Date(code.used_at).toLocaleString('zh-CN') : '-',
+                    new Date(code.created_at).toLocaleString('zh-CN')
+                ])
+            ].map(row => row.join(',')).join('\n');
+
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `兑换码_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        // 页面加载时检查登录状态
+        checkAuth();
+    </script>
+</body>
+</html>
+

@@ -48,11 +48,24 @@ gtag('config','AW-16849325882');
     <span>监控功能</span>
 </a>
 
+<!-- PandaBlock 开发服务链接 -->
+<a href="https://www.pandablockdev.com/" target="_blank" rel="noopener noreferrer" id="pandablock-link" style="position: fixed; bottom: 100px; right: 30px; background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: white; padding: 12px 20px; border-radius: 50px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); z-index: 9997; display: flex; align-items: center; gap: 8px; transition: all 0.3s; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px;">
+    <span style="font-size: 18px;">🐼</span>
+    <span>Web3 开发</span>
+</a>
+
 <style>
     /* 悬停效果 */
     #monitor-float-btn:hover {
         transform: translateY(-3px);
         box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    /* PandaBlock 链接悬停效果 */
+    #pandablock-link:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+        background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
     }
 
     /* 横幅链接悬停效果 */
@@ -76,6 +89,12 @@ gtag('config','AW-16849325882');
             right: 20px;
             padding: 12px 20px;
             font-size: 14px;
+        }
+        #pandablock-link {
+            bottom: 80px;
+            right: 20px;
+            padding: 10px 16px;
+            font-size: 12px;
         }
     }
 

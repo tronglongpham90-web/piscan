@@ -417,19 +417,26 @@
         // 加载数据
         async function loadData() {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/admin/redeem-codes`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    allCodes = data.codes || [];
-                    updateStats(data.stats);
-                    renderTable(allCodes);
-                } else {
-                    throw new Error(data.message || '加载失败');
+                // 从本地 JSON 文件加载
+                const response = await fetch('./codes-data.json');
+
+                if (!response.ok) {
+                    throw new Error('无法加载数据文件');
                 }
+
+                const data = await response.json();
+
+                allCodes = data.codes || [];
+                updateStats(data.stats);
+                renderTable(allCodes);
+
             } catch (error) {
                 console.error('加载失败:', error);
-                alert('加载数据失败，请检查网络连接');
+                alert('加载数据失败：' + error.message + '\n\n请联系管理员更新数据文件');
+                // 显示空数据
+                allCodes = [];
+                updateStats({ total: 0, used: 0, unused: 0, usageRate: 0 });
+                renderTable(allCodes);
             }
         }
 

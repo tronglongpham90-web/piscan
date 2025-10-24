@@ -1,0 +1,192 @@
+{
+  "codes": [
+    {
+      "id": 20,
+      "code": "MAX4P6R8T2V5W7X9",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:16.196Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 19,
+      "code": "ULT8C2E4G6J9L3M5",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:15.980Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 18,
+      "code": "ELI3N5Q7S9V2X4Z6",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:15.765Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 17,
+      "code": "PLT5B7D9F2H4J6L8",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:15.549Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 16,
+      "code": "DIA9K3M5P7R2T4W6",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:15.327Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 15,
+      "code": "BRO2A4C6E8G3H5J7",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:15.111Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 14,
+      "code": "SIL8P2R4T6V9X3Z5",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:14.895Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 13,
+      "code": "GOL3C5E7G9J2L4N6",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:14.680Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 12,
+      "code": "BES6N8Q2S4V7X9Z3",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:14.464Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 11,
+      "code": "TOP7B9D3F5H8K2M4",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:14.248Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 10,
+      "code": "HOT4M6P8R2T5V7X9",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:14.032Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 9,
+      "code": "NEW8A2C4E6G9J3L5",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:13.816Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 8,
+      "code": "TGM3P5R7T9V2X4Z6",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:13.600Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 7,
+      "code": "QQG5C7E9G2J4L6N8",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:13.384Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 6,
+      "code": "MEM8K3M5P7R9T2W4",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:13.168Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 5,
+      "code": "PRO2B4D6F8H3J5L7",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:12.952Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 4,
+      "code": "VIP9N2Q4S6V8X3Z5",
+      "used": false,
+      "used_at": null,
+      "created_at": "2025-10-22T03:00:12.736Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": null
+    },
+    {
+      "id": 3,
+      "code": "FRE6A8C2E4G7K9M3",
+      "used": true,
+      "used_at": "2025-10-24T01:13:12.153Z",
+      "created_at": "2025-10-22T03:00:12.520Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": "3968674364@qq.com"
+    },
+    {
+      "id": 2,
+      "code": "WEL3H5J7P9R2T4V8",
+      "used": true,
+      "used_at": "2025-10-24T01:11:06.929Z",
+      "created_at": "2025-10-22T03:00:12.304Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": "3968674364@qq.com"
+    },
+    {
+      "id": 1,
+      "code": "PIE7K9M2N4Q8W6XZ",
+      "used": true,
+      "used_at": "2025-10-22T03:02:33.789Z",
+      "created_at": "2025-10-22T03:00:12.083Z",
+      "expires_at": "2026-10-22T03:00:11.977Z",
+      "used_by_email": "123619518@qq.com"
+    }
+  ],
+  "stats": {
+    "total": 20,
+    "used": 3,
+    "unused": 17,
+    "expired": 0,
+    "usageRate": 15
+  },
+  "lastUpdated": "2025-10-24T09:37:05.369Z"
+}

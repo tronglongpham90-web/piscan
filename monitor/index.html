@@ -135,20 +135,21 @@
                     <h3 class="text-xl font-semibold mb-3">自定义阈值</h3>
                     <p class="text-gray-600">设置余额阈值，只在达到条件时才发送通知</p>
                 </div>
-                
+
+                <!-- 推荐返现功能暂时隐藏 -->
                 <!-- 功能卡片 4 -->
-                <div class="card-hover bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                <!-- <div class="card-hover bg-white p-6 rounded-xl shadow-md border border-gray-100">
                     <div class="text-4xl mb-4">👥</div>
                     <h3 class="text-xl font-semibold mb-3">推荐返现</h3>
                     <p class="text-gray-600">推荐好友使用，好友付费后您可获得 50% 返现</p>
-                </div>
-                
+                </div> -->
+
                 <!-- 功能卡片 5 -->
-                <div class="card-hover bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                <!-- <div class="card-hover bg-white p-6 rounded-xl shadow-md border border-gray-100">
                     <div class="text-4xl mb-4">💰</div>
                     <h3 class="text-xl font-semibold mb-3">钱包提现</h3>
                     <p class="text-gray-600">推荐收益可随时提现到支付宝或微信</p>
-                </div>
+                </div> -->
                 
                 <!-- 功能卡片 6 -->
                 <div class="card-hover bg-white p-6 rounded-xl shadow-md border border-gray-100">
@@ -236,14 +237,14 @@
                 <div class="bg-white rounded-xl shadow-md p-8 border-2 border-purple-600">
                     <div class="bg-purple-600 text-white text-sm font-semibold px-3 py-1 rounded-full inline-block mb-2">🔥 热门</div>
                     <h3 class="text-2xl font-bold mb-2">付费版</h3>
-                    <div class="text-4xl font-bold mb-2">¥10<span class="text-lg text-gray-500">/月</span></div>
-                    <div class="text-sm text-gray-500 mb-6">或 ¥88/年（省¥32）</div>
+                    <div class="text-4xl font-bold mb-2">¥100<span class="text-lg text-gray-500">/年</span></div>
+                    <div class="text-sm text-gray-500 mb-6">月均仅 ¥8.3</div>
                     <ul class="space-y-3 mb-8">
                         <li class="flex items-start">
                             <svg class="h-6 w-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            <span>10 个监控地址</span>
+                            <span>50 个监控地址</span>
                         </li>
                         <li class="flex items-start">
                             <svg class="h-6 w-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -270,7 +271,7 @@
                             <span>多渠道通知</span>
                         </li>
                     </ul>
-                    <a href="/auth/register.html" class="block w-full text-center bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                    <a href="/monitor/payment.html?plan=premium&duration=12" class="subscribe-btn block w-full text-center bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
                         立即订阅
                     </a>
                 </div>
@@ -326,8 +327,9 @@
                 const token = localStorage.getItem('token');
                 const userEmail = localStorage.getItem('userEmail');
                 const ctaButtons = document.querySelectorAll('.register-cta-btn');
+                const subscribeButtons = document.querySelectorAll('.subscribe-btn');
 
-                console.log('检查登录状态:', { token: !!token, userEmail, buttonCount: ctaButtons.length });
+                console.log('检查登录状态:', { token: !!token, userEmail, buttonCount: ctaButtons.length, subscribeCount: subscribeButtons.length });
 
                 if (token && userEmail) {
                     // 已登录，显示用户信息
@@ -344,6 +346,8 @@
                         button.href = '/monitor/dashboard.html';
                         button.textContent = '进入监控中心';
                     });
+
+                    // 订阅按钮保持不变（已登录用户可以直接订阅）
                     console.log('已更新', ctaButtons.length, '个按钮为: 进入监控中心');
                 } else {
                     // 未登录，显示登录/注册按钮
@@ -364,6 +368,16 @@
                         } else {
                             button.textContent = '免费注册';
                         }
+                    });
+
+                    // 未登录用户点击订阅按钮，跳转到登录页面
+                    subscribeButtons.forEach(function(button) {
+                        const originalHref = button.getAttribute('href');
+                        button.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const returnUrl = encodeURIComponent(originalHref);
+                            window.location.href = '/auth/login.html?return=' + returnUrl;
+                        });
                     });
                 }
             }

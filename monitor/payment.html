@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支付 - PiExplorer</title>
+    <link rel="stylesheet" href="../main.css">
+    <style>
+        .payment-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .plan-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .plan-card h2 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+
+        .plan-card .price {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .plan-card .price small {
+            font-size: 20px;
+            opacity: 0.8;
+        }
+
+        .plan-card .features {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .plan-card .features li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .plan-card .features li:last-child {
+            border-bottom: none;
+        }
+
+        .payment-methods {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .payment-methods h3 {
+            margin: 0 0 20px 0;
+            color: #333;
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .payment-method:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .payment-method.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        }
+
+        .payment-method img {
+            width: 50px;
+            height: 50px;
+            margin-right: 20px;
+        }
+
+        .payment-method .info {
+            flex: 1;
+        }
+
+        .payment-method .name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .payment-method .desc {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .payment-method .badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .pay-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .pay-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .pay-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <a href="upgrade.html" class="back-link">← 返回套餐选择</a>
+
+        <!-- 套餐信息 -->
+        <div class="plan-card" id="planCard">
+            <h2 id="planName">付费版</h2>
+            <div class="price">
+                ¥<span id="planPrice">100</span> <small>/ <span id="planDuration">年</span></small>
+            </div>
+            <ul class="features" id="planFeatures">
+                <li>✓ 50 个监控地址</li>
+                <li>✓ 每小时检查 1 次</li>
+                <li>✓ 无广告邮件</li>
+                <li>✓ 历史数据查询</li>
+                <li>✓ 多渠道通知</li>
+            </ul>
+        </div>
+
+        <!-- 支付方式选择 -->
+        <div class="payment-methods">
+            <h3>选择支付方式</h3>
+
+            <!-- USDT 支付 -->
+            <div class="payment-method selected" data-method="usdt">
+                <img src="https://nowpayments.io/images/coins/usdt.svg" alt="USDT">
+                <div class="info">
+                    <div class="name">USDT (TRC20)</div>
+                    <div class="desc">支持 USDT TRC20/ERC20，安全快捷</div>
+                </div>
+                <span class="badge">推荐</span>
+            </div>
+
+            <!-- 加密货币支付 -->
+            <div class="payment-method" data-method="crypto">
+                <img src="https://nowpayments.io/images/logo.svg" alt="Crypto">
+                <div class="info">
+                    <div class="name">其他加密货币</div>
+                    <div class="desc">支持 BTC, ETH, Pi 等 100+ 种加密货币</div>
+                </div>
+            </div>
+
+            <!-- 微信支付（暂未开放） -->
+            <div class="payment-method" data-method="wechat" style="opacity: 0.5; cursor: not-allowed;">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2309BB07' d='M8.5 8.5c0-.8.7-1.5 1.5-1.5s1.5.7 1.5 1.5-.7 1.5-1.5 1.5-1.5-.7-1.5-1.5zm5 0c0-.8.7-1.5 1.5-1.5s1.5.7 1.5 1.5-.7 1.5-1.5 1.5-1.5-.7-1.5-1.5z'/%3E%3C/svg%3E" alt="微信支付">
+                <div class="info">
+                    <div class="name">微信支付</div>
+                    <div class="desc">暂未开放</div>
+                </div>
+            </div>
+
+            <!-- 支付宝（暂未开放） -->
+            <div class="payment-method" data-method="alipay" style="opacity: 0.5; cursor: not-allowed;">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2300A0E9' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z'/%3E%3C/svg%3E" alt="支付宝">
+                <div class="info">
+                    <div class="name">支付宝</div>
+                    <div class="desc">暂未开放</div>
+                </div>
+            </div>
+
+            <button class="pay-button" id="payButton">立即支付</button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>正在创建订单...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://piexplorer-api.vercel.app';
+
+        // 从 URL 获取套餐信息
+        const urlParams = new URLSearchParams(window.location.search);
+        const planType = urlParams.get('plan') || 'premium';
+        const planDuration = parseInt(urlParams.get('duration') || '1');
+
+        // 套餐配置
+        const plans = {
+            premium: {
+                name: '付费版',
+                prices: { 12: 100 },
+                features: [
+                    '✓ 50 个监控地址',
+                    '✓ 每小时检查 1 次',
+                    '✓ 无广告邮件',
+                    '✓ 历史数据查询',
+                    '✓ 多渠道通知'
+                ]
+            },
+            social: {
+                name: '社交任务版',
+                prices: { 12: 80 },
+                features: [
+                    '✓ 10 个监控地址',
+                    '✓ 每天检查 1 次',
+                    '✓ 完成社交任务',
+                    '✓ 邮件通知',
+                    '✓ 基础功能'
+                ]
+            }
+        };
+
+        // 显示套餐信息
+        const plan = plans[planType];
+        document.getElementById('planName').textContent = plan.name;
+        document.getElementById('planPrice').textContent = plan.prices[planDuration];
+
+        // 显示时长（只支持年付）
+        const durationText = planDuration === 12 ? '年' : `${planDuration} 个月`;
+        document.getElementById('planDuration').textContent = durationText;
+        
+        const featuresHtml = plan.features.map(f => `<li>${f}</li>`).join('');
+        document.getElementById('planFeatures').innerHTML = featuresHtml;
+
+        // 支付方式选择
+        let selectedMethod = 'usdt';
+        
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('click', function() {
+                const methodType = this.dataset.method;
+                
+                // 禁用的支付方式
+                if (methodType === 'wechat' || methodType === 'alipay') {
+                    alert('该支付方式暂未开放，请使用 USDT 支付');
+                    return;
+                }
+                
+                // 移除所有选中状态
+                document.querySelectorAll('.payment-method').forEach(m => {
+                    m.classList.remove('selected');
+                });
+                
+                // 添加选中状态
+                this.classList.add('selected');
+                selectedMethod = methodType;
+            });
+        });
+
+        // 支付按钮
+        document.getElementById('payButton').addEventListener('click', async function() {
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                alert('请先登录');
+                window.location.href = '../auth/login.html';
+                return;
+            }
+
+            // 显示加载状态
+            this.disabled = true;
+            document.getElementById('loading').classList.add('show');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/payment/create-order`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        planType: planType,
+                        planDuration: planDuration,
+                        paymentMethod: selectedMethod
+                    })
+                });
+
+                const data = await response.json();
+                console.log('API 响应:', data);
+
+                if (data.success) {
+                    // 跳转到支付页面
+                    window.location.href = data.data.payment_url;
+                } else {
+                    console.error('创建订单失败:', data);
+                    alert('创建订单失败: ' + (data.message || '未知错误'));
+                    this.disabled = false;
+                    document.getElementById('loading').classList.remove('show');
+                }
+            } catch (error) {
+                console.error('创建订单失败:', error);
+                alert('创建订单失败: ' + error.message);
+                this.disabled = false;
+                document.getElementById('loading').classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
+

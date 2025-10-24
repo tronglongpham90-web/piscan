@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>监控中心 - PiExplorer v2.0</title>
+    <title>监控中心 - PiExplorer v2.1</title>
     <link rel="icon" href="/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -39,6 +39,25 @@
             border-radius: 12px;
             padding: 1.5rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        /* 广告容器样式 */
+        .ad-container {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            border: 1px dashed #e5e7eb;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ad-container::before {
+            content: '';
+            display: none;
+        }
+        #ad-sidebar {
+            min-height: 250px;
         }
     </style>
 </head>
@@ -95,12 +114,13 @@
                         </svg>
                         <span>通知历史</span>
                     </a>
-                    <a href="/monitor/referral.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-600">
+                    <!-- 推荐返现功能暂时隐藏 -->
+                    <!-- <a href="/monitor/referral.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-600">
                         <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
                         <span>推荐返现</span>
-                    </a>
+                    </a> -->
                     <a href="/monitor/settings.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-600">
                         <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
@@ -128,9 +148,14 @@
 
         <!-- 主内容区域 -->
         <main class="flex-1 overflow-y-auto p-6">
+            <!-- 顶部广告位 -->
+            <div id="ad-top" class="ad-container mb-6" style="display: none;">
+                <!-- 广告将动态加载到这里 -->
+            </div>
+
             <!-- 欢迎信息 -->
             <div class="mb-6">
-                <h1 class="text-2xl font-bold text-gray-800">欢迎回来！</h1>
+                <h1 class="text-2xl font-bold text-gray-800">欢迎回来！<span class="text-xs text-gray-400 ml-2">v2.1</span></h1>
                 <p class="text-gray-600">这是您的监控中心概览</p>
             </div>
 
@@ -265,11 +290,26 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 底部广告位 -->
+            <div id="ad-bottom" class="ad-container mt-6" style="display: none;">
+                <!-- 广告将动态加载到这里 -->
+            </div>
         </main>
+
+        <!-- 侧边栏广告位 -->
+        <aside class="hidden lg:block w-80 bg-white border-l overflow-y-auto p-4">
+            <div id="ad-sidebar" class="ad-container" style="display: none;">
+                <!-- 广告将动态加载到这里 -->
+            </div>
+        </aside>
     </div>
 
+    <!-- 广告加载器 -->
+    <script src="/js/ads-loader.js"></script>
+
     <script>
-        const API_BASE_URL = 'http://43.163.239.222';
+        const API_BASE_URL = 'https://piexplorer-api.vercel.app';
         const VERCEL_BYPASS_TOKEN = 'q9Ad6yNz2v787XKcQ1uE0Q8H0NxNddZW';
 
         // 检查登录状态
@@ -292,6 +332,10 @@
             window.location.href = '/auth/login.html';
         });
 
+        // 页面版本检查
+        console.log('🔖 页面版本: v2.1 - 监控限制修复版本');
+        console.log('📅 加载时间:', new Date().toLocaleString());
+
         // 加载监控列表
         async function loadMonitors() {
             try {
@@ -303,11 +347,14 @@
                     return;
                 }
 
-                // 调用后端 API 获取监控列表
-                const response = await fetch(`${API_BASE_URL}/api/monitor?action=list`, {
+                // 调用后端 API 获取监控列表 (v2.1 - 修复限制显示)
+                const timestamp = new Date().getTime();
+                const response = await fetch(`${API_BASE_URL}/api/monitor?action=list&_v=2.1&_t=${timestamp}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
                     }
                 });
 
@@ -337,12 +384,20 @@
 
                     const formattedStats = {
                         monitorCount: data.data.stats.total || 0,
-                        monitorLimit: 10, // 默认限制
+                        monitorLimit: data.data.stats.limit || 1, // 从后端获取限制
                         todayNotifications: 0, // 暂时没有通知数据
                         totalBalanceChange: totalChangeText,
-                        memberType: '免费版',
+                        memberType: data.data.stats.membershipStatus || '免费版',
                         membershipStatus: '已激活'
                     };
+
+                    // 调试日志 - v2.1
+                    console.log('📊 监控统计数据 (v2.1):', {
+                        'API返回的limit': data.data.stats.limit,
+                        '最终使用的limit': formattedStats.monitorLimit,
+                        '监控数量': formattedStats.monitorCount,
+                        '会员类型': formattedStats.memberType
+                    });
 
                     updateStats(formattedStats);
                 }
@@ -384,10 +439,10 @@
                 const lastChecked = monitor.last_checked || monitor.updated_at || '从未';
                 const formattedTime = lastChecked !== '从未' ? new Date(lastChecked).toLocaleString('zh-CN') : '从未';
 
-                // 计算总余额
+                // 只使用主网余额
+                const mainnetAvailable = parseFloat(monitor.mainnet_available || 0);
+                const mainnetLocked = parseFloat(monitor.mainnet_locked || 0);
                 const mainnetTotal = parseFloat(monitor.mainnet_total || 0);
-                const testnetTotal = parseFloat(monitor.testnet_total || 0);
-                const totalBalance = mainnetTotal + testnetTotal;
 
                 const card = document.createElement('div');
                 card.className = 'bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow';
@@ -407,45 +462,24 @@
 
                         <!-- 总余额卡片 -->
                         <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 mb-4">
-                            <p class="text-sm text-purple-600 mb-1">总余额（主网 + 测试网）</p>
-                            <p class="text-3xl font-bold text-purple-900">${totalBalance.toFixed(2)} π</p>
+                            <p class="text-sm text-purple-600 mb-1">总余额</p>
+                            <p class="text-3xl font-bold text-purple-900">${mainnetTotal.toFixed(2)} π</p>
                         </div>
 
-                        <!-- 主网和测试网余额 -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <!-- 主网余额 -->
-                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4">
-                                <div class="flex items-center justify-between mb-2">
-                                    <p class="text-sm font-semibold text-blue-600">🌐 主网 (Mainnet)</p>
-                                </div>
-                                <p class="text-2xl font-bold text-blue-900 mb-2">${mainnetTotal.toFixed(2)} π</p>
-                                <div class="space-y-1 text-sm">
-                                    <div class="flex justify-between">
-                                        <span class="text-blue-600">可用余额:</span>
-                                        <span class="font-semibold text-blue-900">${parseFloat(monitor.mainnet_available || 0).toFixed(2)} π</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-blue-600">锁定余额:</span>
-                                        <span class="font-semibold text-blue-900">${parseFloat(monitor.mainnet_locked || 0).toFixed(2)} π</span>
-                                    </div>
-                                </div>
+                        <!-- 主网余额详情 -->
+                        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 mb-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-sm font-semibold text-blue-600">🌐 主网 (Mainnet)</p>
                             </div>
-
-                            <!-- 测试网余额 -->
-                            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4">
-                                <div class="flex items-center justify-between mb-2">
-                                    <p class="text-sm font-semibold text-green-600">🧪 测试网 (Testnet)</p>
+                            <p class="text-2xl font-bold text-blue-900 mb-3">${mainnetTotal.toFixed(2)} π</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-blue-600">可用余额:</span>
+                                    <span class="font-semibold text-blue-900">${mainnetAvailable.toFixed(2)} π</span>
                                 </div>
-                                <p class="text-2xl font-bold text-green-900 mb-2">${testnetTotal.toFixed(2)} π</p>
-                                <div class="space-y-1 text-sm">
-                                    <div class="flex justify-between">
-                                        <span class="text-green-600">可用余额:</span>
-                                        <span class="font-semibold text-green-900">${parseFloat(monitor.testnet_available || 0).toFixed(2)} π</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-green-600">锁定余额:</span>
-                                        <span class="font-semibold text-green-900">${parseFloat(monitor.testnet_locked || 0).toFixed(2)} π</span>
-                                    </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-blue-600">锁定余额:</span>
+                                    <span class="font-semibold text-blue-900">${mainnetLocked.toFixed(2)} π</span>
                                 </div>
                             </div>
                         </div>
@@ -726,6 +760,11 @@
         // 页面加载
         if (checkAuth()) {
             loadMonitors();
+
+            // 加载广告
+            autoLoadAds(API_BASE_URL, 'dashboard').then(adsCount => {
+                console.log(`Dashboard loaded ${adsCount} ads`);
+            });
         }
     </script>
 </body>

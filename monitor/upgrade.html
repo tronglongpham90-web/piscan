@@ -34,10 +34,11 @@
                     <span class="text-xl mr-3">🔔</span>
                     <span>通知历史</span>
                 </a>
-                <a href="/monitor/referral.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                <!-- 推荐返现功能暂时隐藏 -->
+                <!-- <a href="/monitor/referral.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
                     <span class="text-xl mr-3">💰</span>
                     <span>推荐返现</span>
-                </a>
+                </a> -->
                 <a href="/monitor/settings.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
                     <span class="text-xl mr-3">⚙️</span>
                     <span>账户设置</span>
@@ -87,7 +88,7 @@
                         <ul class="space-y-4 mb-8">
                             <li class="flex items-center space-x-3">
                                 <span class="text-green-600">✓</span>
-                                <span class="text-gray-700">最多 <strong>3 个</strong>监控</span>
+                                <span class="text-gray-700">最多 <strong>1 个</strong>监控</span>
                             </li>
                             <li class="flex items-center space-x-3">
                                 <span class="text-green-600">✓</span>
@@ -127,7 +128,7 @@
                         <ul class="space-y-4 mb-8 text-white">
                             <li class="flex items-center space-x-3">
                                 <span class="text-yellow-300">✓</span>
-                                <span>最多 <strong>10 个</strong>监控</span>
+                                <span>最多 <strong>3 个</strong>监控</span>
                             </li>
                             <li class="flex items-center space-x-3">
                                 <span class="text-yellow-300">✓</span>
@@ -156,15 +157,15 @@
                         <div class="text-center mb-6">
                             <h3 class="text-2xl font-bold text-gray-900">付费版</h3>
                             <div class="mt-4">
-                                <span class="text-5xl font-bold text-purple-600">¥29</span>
-                                <span class="text-gray-500">/月</span>
+                                <span class="text-5xl font-bold text-purple-600">¥100</span>
+                                <span class="text-gray-500">/年</span>
                             </div>
-                            <p class="text-sm text-gray-500 mt-2">或 ¥299/年 (省 ¥49)</p>
+                            <p class="text-sm text-gray-500 mt-2">月均仅 ¥8.3</p>
                         </div>
                         <ul class="space-y-4 mb-8">
                             <li class="flex items-center space-x-3">
                                 <span class="text-purple-600">✓</span>
-                                <span class="text-gray-700"><strong>无限</strong>监控数量</span>
+                                <span class="text-gray-700">最多 <strong>50 个</strong>监控</span>
                             </li>
                             <li class="flex items-center space-x-3">
                                 <span class="text-purple-600">✓</span>
@@ -191,9 +192,11 @@
                                 <span class="text-gray-700">优先技术支持</span>
                             </li>
                         </ul>
-                        <button onclick="showPaymentModal('monthly')" class="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-bold hover:bg-purple-700">
-                            立即升级
-                        </button>
+                        <div class="space-y-3">
+                            <button onclick="goToPayment('premium', 12)" class="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-bold hover:bg-purple-700">
+                                立即订阅 - 年付 (¥100)
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -213,9 +216,9 @@
                             <tbody class="divide-y divide-gray-200">
                                 <tr>
                                     <td class="px-6 py-4 text-sm text-gray-900">监控数量</td>
-                                    <td class="px-6 py-4 text-sm text-center text-gray-600">3 个</td>
-                                    <td class="px-6 py-4 text-sm text-center text-blue-600 font-semibold">10 个</td>
-                                    <td class="px-6 py-4 text-sm text-center text-purple-600 font-semibold">无限</td>
+                                    <td class="px-6 py-4 text-sm text-center text-gray-600">1 个</td>
+                                    <td class="px-6 py-4 text-sm text-center text-blue-600 font-semibold">3 个</td>
+                                    <td class="px-6 py-4 text-sm text-center text-purple-600 font-semibold">50 个</td>
                                 </tr>
                                 <tr>
                                     <td class="px-6 py-4 text-sm text-gray-900">检查频率</td>
@@ -290,109 +293,51 @@
         </main>
     </div>
 
-    <!-- 支付弹窗 -->
-    <div id="payment-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
-            <h3 class="text-2xl font-bold text-gray-900 mb-6">选择支付方式</h3>
-            
-            <div class="space-y-4 mb-6">
-                <button onclick="selectPayment('alipay')" class="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500">
-                    <div class="flex items-center space-x-3">
-                        <span class="text-3xl">💳</span>
-                        <span class="font-semibold">支付宝</span>
-                    </div>
-                    <span class="text-gray-400">→</span>
-                </button>
-                
-                <button onclick="selectPayment('wechat')" class="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg hover:border-green-500">
-                    <div class="flex items-center space-x-3">
-                        <span class="text-3xl">💚</span>
-                        <span class="font-semibold">微信支付</span>
-                    </div>
-                    <span class="text-gray-400">→</span>
-                </button>
-                
-                <button onclick="selectPayment('pi')" class="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500">
-                    <div class="flex items-center space-x-3">
-                        <span class="text-3xl">π</span>
-                        <span class="font-semibold">Pi币支付</span>
-                    </div>
-                    <span class="text-gray-400">→</span>
-                </button>
-            </div>
 
-            <button onclick="closePaymentModal()" class="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                取消
-            </button>
-        </div>
-    </div>
 
     <script>
-        const API_BASE_URL = 'http://43.163.239.222';
-        const VERCEL_BYPASS_TOKEN = 'q9Ad6yNz2v787XKcQ1uE0Q8H0NxNddZW';
-        let selectedPlan = '';
-
-        // 检查登录状态
+        // 检查登录状态（不强制跳转）
         function checkAuth() {
             const token = localStorage.getItem('token');
             const userEmail = localStorage.getItem('userEmail');
-            
-            if (!token || !userEmail) {
-                window.location.href = '/auth/login.html';
+
+            if (token && userEmail) {
+                // 已登录，显示用户信息
+                document.getElementById('user-email').textContent = userEmail;
+                return true;
+            } else {
+                // 未登录，显示"登录"按钮
+                const userEmailElement = document.getElementById('user-email');
+                if (userEmailElement) {
+                    userEmailElement.textContent = '未登录';
+                }
                 return false;
             }
-            
-            document.getElementById('user-email').textContent = userEmail;
-            return true;
         }
 
         // 退出登录
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            localStorage.removeItem('token');
-            localStorage.removeItem('userEmail');
-            window.location.href = '/auth/login.html';
-        });
-
-        // 显示支付弹窗
-        function showPaymentModal(plan) {
-            selectedPlan = plan;
-            document.getElementById('payment-modal').classList.remove('hidden');
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('userEmail');
+                window.location.href = '/auth/login.html';
+            });
         }
 
-        // 关闭支付弹窗
-        function closePaymentModal() {
-            document.getElementById('payment-modal').classList.add('hidden');
-        }
+        // 跳转到支付页面
+        function goToPayment(planType, duration) {
+            const token = localStorage.getItem('token');
 
-        // 选择支付方式
-        async function selectPayment(method) {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${API_BASE_URL}/api/payment/create?x-vercel-protection-bypass=${VERCEL_BYPASS_TOKEN}`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                        'x-vercel-protection-bypass': VERCEL_BYPASS_TOKEN
-                    },
-                    body: JSON.stringify({
-                        plan: selectedPlan,
-                        paymentMethod: method
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    // 跳转到支付页面
-                    window.location.href = data.data.paymentUrl;
-                } else {
-                    alert('❌ ' + data.message);
-                }
-            } catch (error) {
-                console.error('创建支付失败:', error);
-                alert('❌ 创建支付失败，请稍后重试');
+            if (!token) {
+                // 未登录，跳转到登录页面，并带上回调参数
+                const returnUrl = encodeURIComponent(`/monitor/payment.html?plan=${planType}&duration=${duration}`);
+                window.location.href = `/auth/login.html?return=${returnUrl}`;
+                return;
             }
+
+            // 已登录，直接跳转到支付页面
+            window.location.href = `/monitor/payment.html?plan=${planType}&duration=${duration}`;
         }
 
         // 页面加载时执行

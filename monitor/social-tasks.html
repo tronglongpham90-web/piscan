@@ -34,10 +34,11 @@
                     <span class="text-xl mr-3">🔔</span>
                     <span>通知历史</span>
                 </a>
-                <a href="/monitor/referral.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                <!-- 推荐返现功能暂时隐藏 -->
+                <!-- <a href="/monitor/referral.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
                     <span class="text-xl mr-3">💰</span>
                     <span>推荐返现</span>
-                </a>
+                </a> -->
                 <a href="/monitor/settings.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
                     <span class="text-xl mr-3">⚙️</span>
                     <span>账户设置</span>
@@ -73,194 +74,101 @@
                     <p class="text-gray-600 mt-2">完成任务，免费解锁会员功能</p>
                 </div>
 
-                <!-- 进度卡片 -->
+                <!-- 兑换码卡片 -->
                 <div class="bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl shadow-lg p-8 mb-8 text-white">
-                    <div class="flex items-center justify-between mb-6">
-                        <div>
-                            <h3 class="text-2xl font-bold">您的进度</h3>
-                            <p class="text-purple-100 mt-1">完成所有任务即可解锁社交任务版会员</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-4xl font-bold" id="progress-percentage">0%</p>
-                            <p class="text-purple-100">已完成</p>
-                        </div>
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold">🎁 兑换码激活</h3>
+                        <p class="text-purple-100 mt-1">输入兑换码，立即获得 1 个月会员（可监控 3 个地址）</p>
                     </div>
-                    <div class="w-full bg-purple-300 rounded-full h-4">
-                        <div id="progress-bar" class="bg-white rounded-full h-4 transition-all duration-500" style="width: 0%"></div>
-                    </div>
-                    <p class="mt-4 text-sm text-purple-100">
-                        已完成 <span id="completed-tasks">0</span> / <span id="total-tasks">6</span> 个任务
-                    </p>
-                </div>
-
-                <!-- 任务列表 -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- 任务1: 关注Twitter -->
-                    <div class="bg-white rounded-xl shadow-md p-6 border-2 border-transparent hover:border-purple-300 transition-all">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex items-center space-x-3">
-                                <div class="text-4xl">🐦</div>
-                                <div>
-                                    <h3 class="font-bold text-gray-900">关注 Twitter</h3>
-                                    <p class="text-sm text-gray-500">关注我们的 Twitter 账号</p>
-                                </div>
-                            </div>
-                            <span class="task-status px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800" data-task="twitter">
-                                待完成
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-purple-600 font-semibold">+10 积分</span>
-                            <button onclick="completeTask('twitter', 'https://twitter.com/piexplorer')" class="task-btn px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600" data-task="twitter">
-                                去完成
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 任务2: 加入Telegram -->
-                    <div class="bg-white rounded-xl shadow-md p-6 border-2 border-transparent hover:border-purple-300 transition-all">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex items-center space-x-3">
-                                <div class="text-4xl">✈️</div>
-                                <div>
-                                    <h3 class="font-bold text-gray-900">加入 Telegram</h3>
-                                    <p class="text-sm text-gray-500">加入我们的 Telegram 群组</p>
-                                </div>
-                            </div>
-                            <span class="task-status px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800" data-task="telegram">
-                                待完成
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-purple-600 font-semibold">+10 积分</span>
-                            <button onclick="completeTask('telegram', 'https://t.me/piexplorer')" class="task-btn px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600" data-task="telegram">
-                                去完成
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 任务3: 关注Discord -->
-                    <div class="bg-white rounded-xl shadow-md p-6 border-2 border-transparent hover:border-purple-300 transition-all">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex items-center space-x-3">
-                                <div class="text-4xl">💬</div>
-                                <div>
-                                    <h3 class="font-bold text-gray-900">加入 Discord</h3>
-                                    <p class="text-sm text-gray-500">加入我们的 Discord 服务器</p>
-                                </div>
-                            </div>
-                            <span class="task-status px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800" data-task="discord">
-                                待完成
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-purple-600 font-semibold">+10 积分</span>
-                            <button onclick="completeTask('discord', 'https://discord.gg/piexplorer')" class="task-btn px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600" data-task="discord">
-                                去完成
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 任务4: 分享到社交媒体 -->
-                    <div class="bg-white rounded-xl shadow-md p-6 border-2 border-transparent hover:border-purple-300 transition-all">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex items-center space-x-3">
-                                <div class="text-4xl">📢</div>
-                                <div>
-                                    <h3 class="font-bold text-gray-900">分享到社交媒体</h3>
-                                    <p class="text-sm text-gray-500">分享 PiExplorer 到社交媒体</p>
-                                </div>
-                            </div>
-                            <span class="task-status px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800" data-task="share">
-                                待完成
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-purple-600 font-semibold">+15 积分</span>
-                            <button onclick="shareToSocial()" class="task-btn px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600" data-task="share">
-                                去分享
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 任务5: 邀请好友 -->
-                    <div class="bg-white rounded-xl shadow-md p-6 border-2 border-transparent hover:border-purple-300 transition-all">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex items-center space-x-3">
-                                <div class="text-4xl">👥</div>
-                                <div>
-                                    <h3 class="font-bold text-gray-900">邀请 3 位好友</h3>
-                                    <p class="text-sm text-gray-500">邀请好友注册并使用</p>
-                                </div>
-                            </div>
-                            <span class="task-status px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800" data-task="referral">
-                                <span id="referral-count">0</span>/3
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-purple-600 font-semibold">+20 积分</span>
-                            <a href="/monitor/referral.html" class="task-btn px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                                去邀请
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- 任务6: 添加监控 -->
-                    <div class="bg-white rounded-xl shadow-md p-6 border-2 border-transparent hover:border-purple-300 transition-all">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex items-center space-x-3">
-                                <div class="text-4xl">📊</div>
-                                <div>
-                                    <h3 class="font-bold text-gray-900">添加 3 个监控</h3>
-                                    <p class="text-sm text-gray-500">添加至少 3 个钱包监控</p>
-                                </div>
-                            </div>
-                            <span class="task-status px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800" data-task="monitors">
-                                <span id="monitor-count">0</span>/3
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-purple-600 font-semibold">+15 积分</span>
-                            <a href="/monitor/add-monitor.html" class="task-btn px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                                去添加
-                            </a>
-                        </div>
+                    <div class="flex gap-4">
+                        <input
+                            type="text"
+                            id="redeem-code-input"
+                            placeholder="请输入兑换码"
+                            class="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
+                        />
+                        <button
+                            onclick="redeemCode()"
+                            class="px-8 py-3 bg-white text-purple-600 font-semibold rounded-lg hover:bg-purple-50 transition-all"
+                        >
+                            兑换
+                        </button>
                     </div>
                 </div>
 
-                <!-- 奖励说明 -->
-                <div class="mt-8 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl shadow-md p-6 border-2 border-yellow-200">
-                    <div class="flex items-start space-x-4">
-                        <div class="text-5xl">🎁</div>
-                        <div class="flex-1">
-                            <h3 class="text-xl font-bold text-gray-900 mb-2">完成所有任务，解锁社交任务版会员！</h3>
-                            <ul class="space-y-2 text-gray-700">
-                                <li class="flex items-center space-x-2">
-                                    <span class="text-green-600">✓</span>
-                                    <span>监控数量上限提升至 <strong>10 个</strong></span>
-                                </li>
-                                <li class="flex items-center space-x-2">
-                                    <span class="text-green-600">✓</span>
-                                    <span>检查频率提升至 <strong>每小时</strong></span>
-                                </li>
-                                <li class="flex items-center space-x-2">
-                                    <span class="text-green-600">✓</span>
-                                    <span>支持 <strong>自定义阈值通知</strong></span>
-                                </li>
-                                <li class="flex items-center space-x-2">
-                                    <span class="text-green-600">✓</span>
-                                    <span>会员有效期 <strong>30 天</strong></span>
-                                </li>
-                            </ul>
+                <!-- 获取兑换码说明 -->
+                <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">📢 如何获取兑换码？</h3>
+                    <p class="text-gray-600 mb-6">加入我们的社群，即可免费领取兑换码！</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- QQ 群 -->
+                        <div class="bg-white rounded-xl shadow-md p-6 border-2 border-purple-200 hover:border-purple-400 transition-all">
+                            <div class="flex items-center space-x-4 mb-4">
+                                <div class="text-5xl">💬</div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900 text-lg">加入 QQ 群</h3>
+                                    <p class="text-sm text-gray-500">加入群聊，领取兑换码</p>
+                                </div>
+                            </div>
+                            <div class="bg-purple-50 rounded-lg p-4 mb-4">
+                                <p class="text-sm text-gray-600 mb-2">QQ 群号：</p>
+                                <p class="text-2xl font-bold text-purple-600">637147324</p>
+                            </div>
+                            <button onclick="window.open('https://qm.qq.com/cgi-bin/qm/qr?k=637147324', '_blank')" class="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold transition-all">
+                                立即加入 QQ 群
+                            </button>
+                        </div>
+
+                        <!-- Telegram 群 -->
+                        <div class="bg-white rounded-xl shadow-md p-6 border-2 border-purple-200 hover:border-purple-400 transition-all">
+                            <div class="flex items-center space-x-4 mb-4">
+                                <div class="text-5xl">✈️</div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900 text-lg">加入 Telegram 群</h3>
+                                    <p class="text-sm text-gray-500">加入群聊，领取兑换码</p>
+                                </div>
+                            </div>
+                            <div class="bg-purple-50 rounded-lg p-4 mb-4">
+                                <p class="text-sm text-gray-600 mb-2">Telegram 群组：</p>
+                                <p class="text-lg font-bold text-purple-600">@piexplorer</p>
+                            </div>
+                            <button onclick="window.open('https://t.me/piexplorer', '_blank')" class="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold transition-all">
+                                立即加入 Telegram 群
+                            </button>
                         </div>
                     </div>
-                </div>
+
+                    <!-- 使用说明 -->
+                    <div class="mt-8 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl shadow-md p-6 border-2 border-yellow-200">
+                        <div class="flex items-start space-x-4">
+                            <div class="text-5xl">💡</div>
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-gray-900 mb-3">使用兑换码，立即获得会员权益！</h3>
+                                <ul class="space-y-2 text-gray-700">
+                                    <li class="flex items-center space-x-2">
+                                        <span class="text-green-600">✓</span>
+                                        <span>监控数量上限提升至 <strong>3 个</strong></span>
+                                    </li>
+                                    <li class="flex items-center space-x-2">
+                                        <span class="text-green-600">✓</span>
+                                        <span>会员有效期 <strong>30 天</strong></span>
+                                    </li>
+                                </ul>
+                                <div class="mt-4 p-4 bg-white rounded-lg border border-yellow-300">
+                                    <p class="text-sm text-gray-600">
+                                        <strong>📌 温馨提示：</strong>加入 QQ 群或 Telegram 群后，在群公告中可以找到兑换码。每个兑换码只能使用一次。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
             </div>
         </main>
     </div>
 
     <script>
-        const API_BASE_URL = 'http://43.163.239.222';
+        const API_BASE_URL = 'https://piexplorer-api.vercel.app';
         const VERCEL_BYPASS_TOKEN = 'q9Ad6yNz2v787XKcQ1uE0Q8H0NxNddZW';
 
         // 检查登录状态
@@ -284,152 +192,58 @@
             window.location.href = '/auth/login.html';
         });
 
-        // 加载任务进度
-        async function loadTaskProgress() {
+        // 兑换码功能
+        async function redeemCode() {
             if (!checkAuth()) return;
+
+            const codeInput = document.getElementById('redeem-code-input');
+            const code = codeInput.value.trim();
+
+            if (!code) {
+                alert('❌ 请输入兑换码');
+                return;
+            }
 
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${API_BASE_URL}/api/social-tasks?action=progress`, {
+                const response = await fetch(`${API_BASE_URL}/api/social-tasks?action=redeem`, {
+                    method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'x-vercel-protection-bypass': VERCEL_BYPASS_TOKEN
+                    },
+                    body: JSON.stringify({ code })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    updateProgress(data.data);
+                    alert('🎉 兑换成功！您已获得 30 天会员，可以监控 3 个地址！');
+                    codeInput.value = '';
+                    // 跳转到仪表板
+                    setTimeout(() => {
+                        window.location.href = '/monitor/dashboard.html';
+                    }, 1500);
+                } else {
+                    alert('❌ ' + (data.message || '兑换失败，请检查兑换码是否正确'));
                 }
             } catch (error) {
-                console.error('加载任务进度失败:', error);
+                console.error('兑换失败:', error);
+                alert('❌ 兑换失败，请稍后重试');
             }
         }
 
-        // 更新进度显示
-        function updateProgress(progress) {
-            const tasks = progress.tasks || {};
-            const totalTasks = 6;
-            let completedCount = 0;
-
-            // 更新各个任务状态
-            ['twitter', 'telegram', 'discord', 'share'].forEach(task => {
-                if (tasks[task]) {
-                    markTaskCompleted(task);
-                    completedCount++;
-                }
-            });
-
-            // 更新邀请任务
-            const referralCount = progress.referralCount || 0;
-            document.getElementById('referral-count').textContent = referralCount;
-            if (referralCount >= 3) {
-                markTaskCompleted('referral');
-                completedCount++;
+        // 回车键兑换
+        document.getElementById('redeem-code-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                redeemCode();
             }
-
-            // 更新监控任务
-            const monitorCount = progress.monitorCount || 0;
-            document.getElementById('monitor-count').textContent = monitorCount;
-            if (monitorCount >= 3) {
-                markTaskCompleted('monitors');
-                completedCount++;
-            }
-
-            // 更新总进度
-            const percentage = Math.round((completedCount / totalTasks) * 100);
-            document.getElementById('progress-percentage').textContent = percentage + '%';
-            document.getElementById('progress-bar').style.width = percentage + '%';
-            document.getElementById('completed-tasks').textContent = completedCount;
-            document.getElementById('total-tasks').textContent = totalTasks;
-
-            // 如果全部完成，显示祝贺
-            if (completedCount === totalTasks) {
-                showCongratulations();
-            }
-        }
-
-        // 标记任务为已完成
-        function markTaskCompleted(taskName) {
-            const status = document.querySelector(`.task-status[data-task="${taskName}"]`);
-            const btn = document.querySelector(`.task-btn[data-task="${taskName}"]`);
-            
-            if (status) {
-                status.className = 'task-status px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800';
-                status.textContent = '已完成';
-            }
-            
-            if (btn) {
-                btn.className = 'task-btn px-4 py-2 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed';
-                btn.textContent = '已完成';
-                btn.disabled = true;
-            }
-        }
-
-        // 完成任务
-        async function completeTask(taskName, url) {
-            // 打开链接
-            window.open(url, '_blank');
-
-            // 等待用户确认
-            setTimeout(async () => {
-                if (confirm('已完成任务？点击确定提交')) {
-                    try {
-                        const token = localStorage.getItem('token');
-                        const response = await fetch(`${API_BASE_URL}/api/social-tasks?action=complete`, {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${token}`,
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ taskName })
-                        });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            alert('✅ 任务完成！');
-                            loadTaskProgress();
-                        } else {
-                            alert('❌ ' + data.message);
-                        }
-                    } catch (error) {
-                        console.error('提交任务失败:', error);
-                        alert('❌ 提交失败，请稍后重试');
-                    }
-                }
-            }, 3000);
-        }
-
-        // 分享到社交媒体
-        function shareToSocial() {
-            const text = '我正在使用 PiExplorer 监控我的 Pi 钱包余额，非常方便！推荐给大家 👉 https://piexplorer.online';
-            
-            if (navigator.share) {
-                navigator.share({
-                    title: 'PiExplorer - Pi 钱包监控',
-                    text: text,
-                    url: 'https://piexplorer.online'
-                }).then(() => {
-                    completeTask('share', '');
-                });
-            } else {
-                // 复制到剪贴板
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('✅ 分享文本已复制到剪贴板，请粘贴到社交媒体分享');
-                    completeTask('share', '');
-                });
-            }
-        }
-
-        // 显示祝贺
-        function showCongratulations() {
-            alert('🎉 恭喜！您已完成所有任务，社交任务版会员已自动激活！');
-        }
+        });
 
         // 页面加载时执行
         window.addEventListener('DOMContentLoaded', () => {
-            loadTaskProgress();
+            checkAuth();
         });
     </script>
 </body>

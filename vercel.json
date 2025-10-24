@@ -3,6 +3,9 @@
   "outputDirectory": ".",
   "cleanUrls": true,
   "trailingSlash": false,
+  "github": {
+    "silent": true
+  },
   "headers": [
     {
       "source": "/",

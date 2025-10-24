@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试邮件功能 - PiExplorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-2xl mx-auto">
+            <!-- 标题 -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-800 mb-2">📧 测试邮件功能</h1>
+                <p class="text-gray-600">验证邮件发送API是否正常工作</p>
+            </div>
+
+            <!-- 测试卡片 -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">发送测试邮件</h2>
+                
+                <!-- 用户信息 -->
+                <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-gray-600 mb-2">当前用户邮箱:</p>
+                    <p id="user-email" class="text-lg font-bold text-gray-800">加载中...</p>
+                </div>
+
+                <!-- 发送按钮 -->
+                <button 
+                    onclick="sendTestEmail()" 
+                    id="send-btn"
+                    class="w-full px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105 font-bold text-lg flex items-center justify-center gap-3">
+                    <span class="text-2xl">📧</span>
+                    <span>发送测试邮件</span>
+                </button>
+
+                <!-- 结果显示 -->
+                <div id="result" class="hidden mt-6"></div>
+            </div>
+
+            <!-- API测试 -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">API连接测试</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <span class="font-medium text-gray-700">API基础URL</span>
+                        <span id="api-url" class="text-sm text-gray-600">https://piexplorer-api.vercel.app</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <span class="font-medium text-gray-700">认证状态</span>
+                        <span id="auth-status" class="text-sm">检查中...</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <span class="font-medium text-gray-700">邮件API状态</span>
+                        <span id="email-api-status" class="text-sm">未测试</span>
+                    </div>
+                </div>
+
+                <button 
+                    onclick="testAPIConnection()" 
+                    class="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    重新测试API连接
+                </button>
+            </div>
+
+            <!-- 返回按钮 -->
+            <div class="text-center">
+                <a href="/monitor/settings.html" class="inline-block px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                    ← 返回设置页面
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://piexplorer-api.vercel.app';
+        let userEmail = '';
+
+        // 页面加载时检查认证
+        window.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            await testAPIConnection();
+        });
+
+        // 检查认证状态
+        async function checkAuth() {
+            const token = localStorage.getItem('token');
+            const authStatus = document.getElementById('auth-status');
+            
+            if (!token) {
+                authStatus.innerHTML = '<span class="text-red-600">❌ 未登录</span>';
+                document.getElementById('user-email').textContent = '请先登录';
+                document.getElementById('send-btn').disabled = true;
+                document.getElementById('send-btn').classList.add('opacity-50', 'cursor-not-allowed');
+                return false;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/user?action=get-profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    userEmail = data.user.email;
+                    document.getElementById('user-email').textContent = userEmail;
+                    authStatus.innerHTML = '<span class="text-green-600">✅ 已登录</span>';
+                    return true;
+                } else {
+                    authStatus.innerHTML = '<span class="text-red-600">❌ Token无效</span>';
+                    document.getElementById('user-email').textContent = '请重新登录';
+                    return false;
+                }
+            } catch (error) {
+                authStatus.innerHTML = '<span class="text-red-600">❌ 连接失败</span>';
+                document.getElementById('user-email').textContent = '无法连接到服务器';
+                return false;
+            }
+        }
+
+        // 测试API连接
+        async function testAPIConnection() {
+            const emailApiStatus = document.getElementById('email-api-status');
+            emailApiStatus.innerHTML = '<span class="text-yellow-600">⏳ 测试中...</span>';
+
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    emailApiStatus.innerHTML = '<span class="text-red-600">❌ 未登录</span>';
+                    return;
+                }
+
+                // 测试邮件API是否存在（发送OPTIONS请求）
+                const response = await fetch(`${API_BASE_URL}/api/send-test-email`, {
+                    method: 'OPTIONS'
+                });
+
+                if (response.ok) {
+                    emailApiStatus.innerHTML = '<span class="text-green-600">✅ API可用</span>';
+                } else {
+                    emailApiStatus.innerHTML = '<span class="text-yellow-600">⚠️ API响应异常</span>';
+                }
+            } catch (error) {
+                emailApiStatus.innerHTML = '<span class="text-red-600">❌ 无法连接</span>';
+            }
+        }
+
+        // 发送测试邮件
+        async function sendTestEmail() {
+            const btn = document.getElementById('send-btn');
+            const resultDiv = document.getElementById('result');
+            
+            // 禁用按钮
+            btn.disabled = true;
+            btn.innerHTML = '<span class="text-2xl">⏳</span><span>发送中...</span>';
+            
+            // 隐藏之前的结果
+            resultDiv.classList.add('hidden');
+            
+            try {
+                const token = localStorage.getItem('token');
+                
+                if (!token) {
+                    throw new Error('请先登录');
+                }
+
+                const response = await fetch(`${API_BASE_URL}/api/send-test-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // 显示成功消息
+                    resultDiv.className = 'mt-6 p-6 rounded-lg bg-green-50 border-2 border-green-500';
+                    resultDiv.innerHTML = `
+                        <div class="flex items-start">
+                            <span class="text-4xl mr-4">✅</span>
+                            <div class="flex-1">
+                                <p class="font-bold text-green-800 text-xl mb-2">测试邮件已发送！</p>
+                                <p class="text-green-700 mb-2">
+                                    用户邮箱: <strong class="text-lg">${data.email}</strong>
+                                </p>
+                                ${data.isTestMode ? `
+                                    <div class="mt-3 p-3 bg-yellow-100 border border-yellow-400 rounded">
+                                        <p class="text-sm text-yellow-800">
+                                            ⚠️ <strong>测试模式</strong>: 由于 Resend 免费账户限制，邮件已发送到:
+                                        </p>
+                                        <p class="text-base text-yellow-900 font-bold mt-1">
+                                            ${data.recipientEmail}
+                                        </p>
+                                        <p class="text-xs text-yellow-700 mt-2">
+                                            要发送到真实用户邮箱，请在 Resend 验证自定义域名。
+                                        </p>
+                                    </div>
+                                ` : `
+                                    <p class="text-green-600 mb-3">
+                                        请检查您的邮箱（包括垃圾邮件文件夹）
+                                    </p>
+                                `}
+                                <div class="mt-4 text-sm text-gray-600">
+                                    <p>✉️ 邮件主题: 🎉 PiExplorer 邮件通知测试</p>
+                                    <p>📅 发送时间: ${new Date().toLocaleString('zh-CN')}</p>
+                                    ${data.messageId ? `<p>🆔 消息ID: ${data.messageId}</p>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    resultDiv.classList.remove('hidden');
+                } else {
+                    // 显示错误消息
+                    resultDiv.className = 'mt-6 p-6 rounded-lg bg-red-50 border-2 border-red-500';
+                    resultDiv.innerHTML = `
+                        <div class="flex items-start">
+                            <span class="text-4xl mr-4">❌</span>
+                            <div class="flex-1">
+                                <p class="font-bold text-red-800 text-xl mb-2">发送失败</p>
+                                <p class="text-red-700">${data.message}</p>
+                                <div class="mt-3 text-sm text-red-600">
+                                    <p>请检查:</p>
+                                    <ul class="list-disc list-inside mt-1">
+                                        <li>是否已登录</li>
+                                        <li>网络连接是否正常</li>
+                                        <li>API服务是否正常</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    resultDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('发送测试邮件失败:', error);
+                resultDiv.className = 'mt-6 p-6 rounded-lg bg-red-50 border-2 border-red-500';
+                resultDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <span class="text-4xl mr-4">❌</span>
+                        <div class="flex-1">
+                            <p class="font-bold text-red-800 text-xl mb-2">发送失败</p>
+                            <p class="text-red-700">${error.message}</p>
+                            <p class="text-sm text-red-600 mt-2">网络错误，请稍后重试</p>
+                        </div>
+                    </div>
+                `;
+                resultDiv.classList.remove('hidden');
+            } finally {
+                // 恢复按钮
+                btn.disabled = false;
+                btn.innerHTML = '<span class="text-2xl">📧</span><span>发送测试邮件</span>';
+            }
+        }
+    </script>
+</body>
+</html>
+

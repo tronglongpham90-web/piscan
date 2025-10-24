@@ -63,31 +63,22 @@
                 </div>
 
                 <!-- 余额概览 -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg">
-                        <p class="text-sm text-purple-600 mb-1">总余额</p>
-                        <p class="text-2xl font-bold text-purple-900" id="current-balance">0 π</p>
-                        <p class="text-xs text-purple-600 mt-1" id="balance-change">0 π</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-lg">
+                        <p class="text-sm text-blue-600 mb-2">可用余额:</p>
+                        <p class="text-3xl font-bold text-blue-900" id="mainnet-available">0 π</p>
                     </div>
-                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
-                        <p class="text-sm text-blue-600 mb-1">主网余额</p>
-                        <p class="text-2xl font-bold text-blue-900" id="mainnet-total">0 π</p>
-                        <p class="text-xs text-blue-600 mt-1">
-                            可用: <span id="mainnet-available">0</span> π |
-                            锁定: <span id="mainnet-locked">0</span> π
-                        </p>
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-lg">
+                        <p class="text-sm text-purple-600 mb-2">锁定中</p>
+                        <p class="text-sm text-purple-700 mb-1">总锁定 (<span id="claimable-count">0</span> 项):</p>
+                        <p class="text-3xl font-bold text-purple-900" id="mainnet-locked">0 π</p>
+                        <p class="text-xs text-purple-600 mt-2">下次解锁时间:</p>
+                        <p class="text-sm font-medium text-purple-900" id="next-unlock">无效时间</p>
                     </div>
-                    <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg">
-                        <p class="text-sm text-green-600 mb-1">测试网余额</p>
-                        <p class="text-2xl font-bold text-green-900" id="testnet-total">0 π</p>
-                        <p class="text-xs text-green-600 mt-1">
-                            可用: <span id="testnet-available">0</span> π
-                        </p>
-                    </div>
-                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg">
-                        <p class="text-sm text-gray-600 mb-1">检查频率</p>
-                        <p class="text-lg font-semibold text-gray-900" id="frequency">每天</p>
-                        <p class="text-xs text-gray-600 mt-1">最后检查</p>
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-2">最后修改时间:</p>
+                        <p class="text-lg font-semibold text-gray-900" id="last-modified">未知</p>
+                        <p class="text-xs text-gray-600 mt-3">最后检查:</p>
                         <p class="text-sm font-medium text-gray-900" id="last-checked">未检查</p>
                     </div>
                 </div>
@@ -108,6 +99,17 @@
                             <p class="text-sm font-medium text-gray-900" id="threshold-decrease">未设置</p>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- 可领取余额详情 -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">可领取余额</h2>
+                <div id="claimable-balances-list">
+                    <!-- 动态填充 -->
+                </div>
+                <div id="no-claimable" class="hidden text-center py-8 text-gray-500">
+                    暂无可领取余额
                 </div>
             </div>
 
@@ -147,7 +149,7 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'http://43.163.239.222';
+        const API_BASE_URL = 'https://piexplorer-api.vercel.app';
         const VERCEL_BYPASS_TOKEN = 'q9Ad6yNz2v787XKcQ1uE0Q8H0NxNddZW';
 
         // 检查登录状态
@@ -205,41 +207,40 @@
                     throw new Error(data.message || '获取监控详情失败');
                 }
 
-                const monitor = data.data.monitor;
+                const monitor = data.data.monitor || data.data;
                 const records = data.data.records || [];
                 const notifications = data.data.notifications || [];
 
                 // 显示基本信息
-                document.getElementById('monitor-name').textContent = monitor.monitorName || '未命名监控';
-                document.getElementById('wallet-address').textContent = monitor.walletAddress;
-                document.getElementById('current-balance').textContent = parseFloat(monitor.currentBalance).toFixed(2) + ' π';
-
-                const balanceChange = parseFloat(monitor.balanceChange);
-                const balanceChangeText = balanceChange > 0 ? `+${balanceChange.toFixed(2)}` : balanceChange.toFixed(2);
-                const balanceChangeColor = balanceChange > 0 ? 'text-green-600' : (balanceChange < 0 ? 'text-red-600' : 'text-gray-600');
-                document.getElementById('balance-change').textContent = balanceChangeText + ' π';
-                document.getElementById('balance-change').className = `text-xs ${balanceChangeColor}`;
+                document.getElementById('monitor-name').textContent = monitor.monitor_name || monitor.nickname || '未命名监控';
+                document.getElementById('wallet-address').textContent = monitor.wallet_address;
 
                 // 显示主网余额
-                document.getElementById('mainnet-total').textContent = parseFloat(monitor.mainnet.total).toFixed(2) + ' π';
-                document.getElementById('mainnet-available').textContent = parseFloat(monitor.mainnet.available).toFixed(2);
-                document.getElementById('mainnet-locked').textContent = parseFloat(monitor.mainnet.locked).toFixed(2);
+                const mainnetAvailable = parseFloat(monitor.mainnet_available || 0);
+                const mainnetLocked = parseFloat(monitor.mainnet_locked || 0);
 
-                // 显示测试网余额
-                document.getElementById('testnet-total').textContent = parseFloat(monitor.testnet.total).toFixed(2) + ' π';
-                document.getElementById('testnet-available').textContent = parseFloat(monitor.testnet.available).toFixed(2);
+                document.getElementById('mainnet-available').textContent = mainnetAvailable.toFixed(2) + ' π';
+                document.getElementById('mainnet-locked').textContent = mainnetLocked.toFixed(2) + ' π';
 
-                document.getElementById('frequency').textContent = getFrequencyName(monitor.frequency);
-                document.getElementById('last-checked').textContent = monitor.lastCheckedAt
-                    ? new Date(monitor.lastCheckedAt).toLocaleString('zh-CN')
+                // 显示可领取余额数量（需要从API获取详细信息）
+                document.getElementById('claimable-count').textContent = '0';
+                document.getElementById('next-unlock').textContent = '无效时间';
+
+                // 显示最后修改时间
+                document.getElementById('last-modified').textContent = monitor.updated_at
+                    ? new Date(monitor.updated_at).toLocaleString('zh-CN')
+                    : '未知';
+
+                document.getElementById('last-checked').textContent = monitor.last_checked_at
+                    ? new Date(monitor.last_checked_at).toLocaleString('zh-CN')
                     : '未检查';
-                
-                document.getElementById('notify-all').textContent = monitor.notifyAll ? '是' : '否';
-                document.getElementById('threshold-increase').textContent = monitor.thresholdIncrease 
-                    ? `${monitor.thresholdIncrease} π` 
+
+                document.getElementById('notify-all').textContent = monitor.notify_all ? '是' : '否';
+                document.getElementById('threshold-increase').textContent = monitor.threshold_increase
+                    ? `${monitor.threshold_increase} π`
                     : '未设置';
-                document.getElementById('threshold-decrease').textContent = monitor.thresholdDecrease 
-                    ? `${monitor.thresholdDecrease} π` 
+                document.getElementById('threshold-decrease').textContent = monitor.threshold_decrease
+                    ? `${monitor.threshold_decrease} π`
                     : '未设置';
 
                 // 状态徽章
@@ -251,6 +252,9 @@
                     statusBadge.className = 'px-3 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800';
                     statusBadge.textContent = '已暂停';
                 }
+
+                // 获取可领取余额详情
+                await loadClaimableBalances(monitor.wallet_address);
 
                 // 显示余额历史
                 if (records.length > 0) {
@@ -276,6 +280,99 @@
             }
         }
 
+        // 加载可领取余额详情
+        async function loadClaimableBalances(walletAddress) {
+            try {
+                // 直接调用 Pi Network API 获取可领取余额
+                const response = await fetch(`https://api.mainnet.minepi.com/claimable_balances?claimant=${walletAddress}`);
+                const data = await response.json();
+
+                if (data._embedded && data._embedded.records) {
+                    const claimableBalances = data._embedded.records;
+
+                    if (claimableBalances.length > 0) {
+                        document.getElementById('claimable-count').textContent = claimableBalances.length;
+
+                        // 计算下次解锁时间
+                        let nextUnlockTime = null;
+                        claimableBalances.forEach(cb => {
+                            if (cb.claimants && cb.claimants.length > 0) {
+                                const claimant = cb.claimants[0];
+                                if (claimant.predicate && claimant.predicate.not && claimant.predicate.not.abs_before_epoch) {
+                                    const unlockTime = new Date(claimant.predicate.not.abs_before_epoch);
+                                    if (!nextUnlockTime || unlockTime < nextUnlockTime) {
+                                        nextUnlockTime = unlockTime;
+                                    }
+                                }
+                            }
+                        });
+
+                        if (nextUnlockTime) {
+                            document.getElementById('next-unlock').textContent = nextUnlockTime.toLocaleString('zh-CN');
+                        }
+
+                        renderClaimableBalances(claimableBalances);
+                    } else {
+                        document.getElementById('no-claimable').classList.remove('hidden');
+                    }
+                } else {
+                    document.getElementById('no-claimable').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('获取可领取余额失败:', error);
+                document.getElementById('no-claimable').classList.remove('hidden');
+            }
+        }
+
+        // 渲染可领取余额列表
+        function renderClaimableBalances(claimableBalances) {
+            const container = document.getElementById('claimable-balances-list');
+            container.innerHTML = '';
+
+            claimableBalances.forEach(cb => {
+                const amount = parseFloat(cb.amount);
+                const sponsor = cb.sponsor;
+                const shortSponsor = sponsor.substring(0, 10) + '...' + sponsor.substring(sponsor.length - 10);
+
+                let lockDays = '未知';
+                let unlockDate = '未知';
+
+                if (cb.claimants && cb.claimants.length > 0) {
+                    const claimant = cb.claimants[0];
+                    if (claimant.predicate && claimant.predicate.not && claimant.predicate.not.abs_before_epoch) {
+                        const unlockTime = new Date(claimant.predicate.not.abs_before_epoch);
+                        const createdTime = new Date(cb.last_modified_time);
+                        lockDays = Math.ceil((unlockTime - createdTime) / (1000 * 60 * 60 * 24));
+                        unlockDate = unlockTime.toLocaleString('zh-CN');
+                    }
+                }
+
+                const item = document.createElement('div');
+                item.className = 'border-b border-gray-200 py-4 last:border-b-0';
+                item.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="text-sm text-gray-600">源账户:</span>
+                                <span class="text-sm font-mono text-blue-600" title="${sponsor}">${shortSponsor}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 space-y-1">
+                                <div>领取人: <span class="font-mono">${walletAddress.substring(0, 10)}...${walletAddress.substring(walletAddress.length - 10)}</span></div>
+                                <div>必须在此期间内领取 14 天</div>
+                                <div>锁定 ${lockDays} 天</div>
+                                <div>解锁时间: ${unlockDate}</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-purple-900">${amount.toFixed(1)}</div>
+                            <div class="text-xs text-gray-500">π</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
         // 渲染余额历史
         function renderHistory(records) {
             const tbody = document.getElementById('history-tbody');
@@ -285,13 +382,13 @@
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-50';
 
-                const change = parseFloat(record.balanceChange);
+                const change = parseFloat(record.balance_change || record.balanceChange || 0);
                 const changeText = change > 0 ? `+${change.toFixed(2)}` : change.toFixed(2);
                 const changeColor = change > 0 ? 'text-green-600' : (change < 0 ? 'text-red-600' : 'text-gray-600');
 
                 row.innerHTML = `
                     <td class="px-6 py-4 text-sm text-gray-500">
-                        ${new Date(record.checkedAt).toLocaleString('zh-CN')}
+                        ${new Date(record.checked_at || record.checkedAt).toLocaleString('zh-CN')}
                     </td>
                     <td class="px-6 py-4 text-sm font-medium text-gray-900">
                         ${parseFloat(record.balance).toFixed(2)} π
@@ -320,7 +417,7 @@
                             <h4 class="text-sm font-semibold text-gray-900">${notif.title || '通知'}</h4>
                             <p class="text-sm text-gray-600 mt-1">${notif.message}</p>
                             <p class="text-xs text-gray-400 mt-2">
-                                ${new Date(notif.createdAt).toLocaleString('zh-CN')}
+                                ${new Date(notif.created_at || notif.createdAt).toLocaleString('zh-CN')}
                             </p>
                         </div>
                         ${!notif.isRead ? '<span class="ml-2 w-2 h-2 bg-purple-600 rounded-full"></span>' : ''}

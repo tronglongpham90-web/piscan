@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>初始化兑换码系统 - PiExplorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-2xl w-full bg-white rounded-xl shadow-lg p-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">🔧 初始化兑换码系统</h1>
+        
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700">
+                        <strong>仅管理员使用！</strong> 此页面用于首次初始化兑换码系统。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4 mb-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">管理员密钥</label>
+                <input 
+                    type="password" 
+                    id="admin-key" 
+                    placeholder="请输入管理员密钥"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+                <p class="mt-1 text-sm text-gray-500">默认密钥：your-secret-admin-key-2025</p>
+            </div>
+        </div>
+
+        <button 
+            onclick="initializeSystem()" 
+            class="w-full px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-all mb-4">
+            🚀 开始初始化
+        </button>
+
+        <div id="result" class="hidden"></div>
+
+        <div class="mt-8 bg-gray-50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">📋 初始化内容</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+                <li class="flex items-start">
+                    <span class="text-green-500 mr-2">✓</span>
+                    <span>创建 redeem_codes 表</span>
+                </li>
+                <li class="flex items-start">
+                    <span class="text-green-500 mr-2">✓</span>
+                    <span>创建索引以提高查询性能</span>
+                </li>
+                <li class="flex items-start">
+                    <span class="text-green-500 mr-2">✓</span>
+                    <span>插入 20 个预生成的兑换码</span>
+                </li>
+                <li class="flex items-start">
+                    <span class="text-green-500 mr-2">✓</span>
+                    <span>每个兑换码有效期 1 年</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="mt-6 bg-blue-50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">🎫 预生成的兑换码</h3>
+            <div class="grid grid-cols-2 gap-2 text-xs font-mono text-gray-700">
+                <div>PIE7K9M2N4Q8W6XZ</div>
+                <div>WEL3H5J7P9R2T4V8</div>
+                <div>FRE6A8C2E4G7K9M3</div>
+                <div>VIP9N2Q4S6V8X3Z5</div>
+                <div>PRO2B4D6F8H3J5L7</div>
+                <div>MEM8K3M5P7R9T2W4</div>
+                <div>QQG5C7E9G2J4L6N8</div>
+                <div>TGM3P5R7T9V2X4Z6</div>
+                <div>NEW8A2C4E6G9J3L5</div>
+                <div>HOT4M6P8R2T5V7X9</div>
+                <div>TOP7B9D3F5H8K2M4</div>
+                <div>BES6N8Q2S4V7X9Z3</div>
+                <div>GOL3C5E7G9J2L4N6</div>
+                <div>SIL8P2R4T6V9X3Z5</div>
+                <div>BRO2A4C6E8G3H5J7</div>
+                <div>DIA9K3M5P7R2T4W6</div>
+                <div>PLT5B7D9F2H4J6L8</div>
+                <div>ELI3N5Q7S9V2X4Z6</div>
+                <div>ULT8C2E4G6J9L3M5</div>
+                <div>MAX4P6R8T2V5W7X9</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://piexplorer-api.vercel.app';
+
+        async function initializeSystem() {
+            const adminKey = document.getElementById('admin-key').value.trim();
+            const resultDiv = document.getElementById('result');
+
+            if (!adminKey) {
+                alert('❌ 请输入管理员密钥');
+                return;
+            }
+
+            resultDiv.innerHTML = `
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+                    <p class="text-blue-700">⏳ 正在初始化系统，请稍候...</p>
+                </div>
+            `;
+            resultDiv.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/init-redeem-codes`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-key': adminKey
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="bg-green-50 border-l-4 border-green-400 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-green-800">✅ 初始化成功！</h3>
+                                    <div class="mt-2 text-sm text-green-700">
+                                        <ul class="list-disc list-inside space-y-1">
+                                            <li>新增兑换码：${data.data.codesInserted} 个</li>
+                                            <li>已存在兑换码：${data.data.codesSkipped} 个</li>
+                                            <li>总兑换码数：${data.data.totalCodes} 个</li>
+                                            <li>可用兑换码：${data.data.availableCodes} 个</li>
+                                            <li>有效期至：${new Date(data.data.expiresAt).toLocaleDateString()}</li>
+                                        </ul>
+                                    </div>
+                                    <div class="mt-4">
+                                        <a href="/monitor/social-tasks.html" class="text-green-700 font-semibold hover:text-green-900">
+                                            → 前往社交任务页面测试兑换
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-red-800">❌ 初始化失败</h3>
+                                    <div class="mt-2 text-sm text-red-700">
+                                        <p>${data.message}</p>
+                                        ${data.error ? `<p class="mt-1 text-xs">错误详情：${data.error}</p>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('初始化失败:', error);
+                resultDiv.innerHTML = `
+                    <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">❌ 网络错误</h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <p>${error.message}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // 回车键提交
+        document.getElementById('admin-key').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                initializeSystem();
+            }
+        });
+    </script>
+</body>
+</html>
+

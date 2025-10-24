@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>广告测试页面 - PiExplorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .status {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+
+        .status h2 {
+            color: #0369a1;
+            margin-bottom: 10px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .status-item .icon {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        .ad-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 2px dashed #cbd5e1;
+        }
+
+        .ad-section h3 {
+            color: #334155;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ad-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .loading {
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .info-box h4 {
+            color: #92400e;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #78350f;
+            line-height: 1.6;
+        }
+
+        .test-results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f1f5f9;
+            border-radius: 12px;
+        }
+
+        .test-results h3 {
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+
+        .test-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #94a3b8;
+        }
+
+        .test-item.success {
+            border-left-color: #22c55e;
+        }
+
+        .test-item.error {
+            border-left-color: #ef4444;
+        }
+
+        .test-item .label {
+            font-weight: 600;
+            margin-right: 10px;
+            min-width: 150px;
+        }
+
+        .test-item .value {
+            color: #64748b;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-group {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        code {
+            background: #1e293b;
+            color: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 PiExplorer 广告系统测试</h1>
+
+        <div class="status">
+            <h2>📊 系统状态</h2>
+            <div class="status-item">
+                <span class="icon">🌐</span>
+                <span>网站: <strong>piexplorer.online</strong></span>
+            </div>
+            <div class="status-item">
+                <span class="icon">📺</span>
+                <span>广告平台: <strong>A-ADS</strong></span>
+            </div>
+            <div class="status-item">
+                <span class="icon">🔢</span>
+                <span>广告单元ID: <strong>2413765</strong></span>
+            </div>
+            <div class="status-item">
+                <span class="icon" id="api-status-icon">⏳</span>
+                <span>API状态: <strong id="api-status">检测中...</strong></span>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h4>⚠️ 为什么A-ADS显示 "Not found"？</h4>
+            <p>
+                这是正常的！A-ADS需要24-48小时来检测你的网站上的广告代码。
+                只要广告代码正确加载（如下所示），就会开始计费。
+                即使状态显示"Not found"，广告展示也会被计数。
+            </p>
+        </div>
+
+        <!-- 顶部广告 -->
+        <div class="ad-section">
+            <h3>📺 顶部横幅广告 (728x90)</h3>
+            <div id="ad-top" class="ad-container">
+                <span class="loading">加载中...</span>
+            </div>
+        </div>
+
+        <!-- 侧边栏广告 -->
+        <div class="ad-section">
+            <h3>📺 侧边栏广告 (300x250)</h3>
+            <div id="ad-sidebar" class="ad-container">
+                <span class="loading">加载中...</span>
+            </div>
+        </div>
+
+        <!-- 底部广告 -->
+        <div class="ad-section">
+            <h3>📺 底部横幅广告 (728x90)</h3>
+            <div id="ad-bottom" class="ad-container">
+                <span class="loading">加载中...</span>
+            </div>
+        </div>
+
+        <!-- 测试结果 -->
+        <div class="test-results">
+            <h3>🔍 测试结果</h3>
+            <div id="test-results-container">
+                <div class="test-item">
+                    <span class="label">正在运行测试...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 按钮组 -->
+        <div class="button-group">
+            <button onclick="location.reload()">🔄 刷新页面</button>
+            <button onclick="window.open('https://a-ads.com/', '_blank')">📊 查看A-ADS Dashboard</button>
+            <button onclick="window.open('/monitor/ads-management', '_blank')">⚙️ 广告管理</button>
+        </div>
+
+        <div class="info-box" style="background: #dcfce7; border-left-color: #22c55e;">
+            <h4>✅ 下一步</h4>
+            <p>
+                1. 等待24-48小时，A-ADS会自动检测你的广告代码<br>
+                2. 增加网站流量，让更多用户访问<br>
+                3. 在A-ADS Dashboard查看展示次数和收益<br>
+                4. 考虑注册Coinzilla（更高CPM）
+            </p>
+        </div>
+    </div>
+
+    <!-- 加载广告脚本 -->
+    <script src="/js/ads-loader.js"></script>
+    <script>
+        const API_BASE_URL = 'https://piexplorer-api.vercel.app';
+        const testResults = [];
+
+        // 添加测试结果
+        function addTestResult(label, value, success = true) {
+            testResults.push({ label, value, success });
+            updateTestResults();
+        }
+
+        // 更新测试结果显示
+        function updateTestResults() {
+            const container = document.getElementById('test-results-container');
+            container.innerHTML = testResults.map(result => `
+                <div class="test-item ${result.success ? 'success' : 'error'}">
+                    <span class="label">${result.label}</span>
+                    <span class="value">${result.value}</span>
+                </div>
+            `).join('');
+        }
+
+        // 测试API连接
+        async function testAPI() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/ads?action=get&page=dashboard`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    addTestResult('✅ API连接', '成功', true);
+                    addTestResult('📊 广告位数量', `${data.ads.length} 个`, true);
+                    addTestResult('👤 会员类型', data.membership_type, true);
+                    
+                    document.getElementById('api-status').textContent = '✅ 正常';
+                    document.getElementById('api-status-icon').textContent = '✅';
+                } else {
+                    addTestResult('❌ API连接', '失败', false);
+                    document.getElementById('api-status').textContent = '❌ 异常';
+                    document.getElementById('api-status-icon').textContent = '❌';
+                }
+            } catch (error) {
+                addTestResult('❌ API连接', error.message, false);
+                document.getElementById('api-status').textContent = '❌ 异常';
+                document.getElementById('api-status-icon').textContent = '❌';
+            }
+        }
+
+        // 加载广告
+        async function loadAds() {
+            try {
+                addTestResult('🔄 加载广告', '开始...', true);
+                
+                const adsLoader = initAdsLoader(API_BASE_URL);
+                
+                // 加载顶部广告
+                const topAd = await adsLoader.loadAdByPosition('dashboard', 'top');
+                if (topAd) {
+                    addTestResult('📺 顶部广告', '加载成功', true);
+                } else {
+                    addTestResult('⚠️ 顶部广告', '未找到', false);
+                }
+                
+                // 加载侧边栏广告
+                const sidebarAd = await adsLoader.loadAdByPosition('dashboard', 'sidebar');
+                if (sidebarAd) {
+                    addTestResult('📺 侧边栏广告', '加载成功', true);
+                } else {
+                    addTestResult('⚠️ 侧边栏广告', '未找到', false);
+                }
+                
+                // 加载底部广告
+                const bottomAd = await adsLoader.loadAdByPosition('dashboard', 'bottom');
+                if (bottomAd) {
+                    addTestResult('📺 底部广告', '加载成功', true);
+                } else {
+                    addTestResult('⚠️ 底部广告', '未找到', false);
+                }
+                
+                addTestResult('✅ 广告加载', '完成', true);
+                
+                // 检查iframe是否加载
+                setTimeout(() => {
+                    const iframes = document.querySelectorAll('iframe[data-aa]');
+                    addTestResult('🖼️ A-ADS iframe', `${iframes.length} 个`, iframes.length > 0);
+                    
+                    if (iframes.length > 0) {
+                        addTestResult('✅ 广告代码', '正确加载', true);
+                        addTestResult('⏰ 等待时间', '24-48小时后A-ADS会检测到', true);
+                    }
+                }, 2000);
+                
+            } catch (error) {
+                addTestResult('❌ 加载广告', error.message, false);
+            }
+        }
+
+        // 页面加载完成后执行测试
+        window.addEventListener('DOMContentLoaded', async () => {
+            addTestResult('🚀 页面加载', '完成', true);
+            
+            // 测试API
+            await testAPI();
+            
+            // 加载广告
+            await loadAds();
+        });
+    </script>
+</body>
+</html>
+

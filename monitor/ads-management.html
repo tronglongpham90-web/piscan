@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>广告管理 - PiExplorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">📺 广告管理</h1>
+
+        <!-- 广告位列表 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">广告位列表</h2>
+            <div id="ads-list" class="space-y-4">
+                <!-- 动态加载 -->
+            </div>
+        </div>
+
+        <!-- 添加新广告位 -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">添加新广告位</h2>
+            <form id="add-ad-form" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">广告位ID</label>
+                        <input type="text" name="placement_id" required
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                               placeholder="例如: dashboard_top">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">广告位名称</label>
+                        <input type="text" name="name" required
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                               placeholder="例如: 仪表板顶部横幅">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">页面</label>
+                        <select name="page" required
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500">
+                            <option value="dashboard">仪表板</option>
+                            <option value="detail">监控详情</option>
+                            <option value="notifications">通知历史</option>
+                            <option value="all">所有页面</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">位置</label>
+                        <select name="position" required
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500">
+                            <option value="top">顶部</option>
+                            <option value="sidebar">侧边栏</option>
+                            <option value="middle">中间</option>
+                            <option value="bottom">底部</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">平台</label>
+                        <select name="platform"
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500">
+                            <option value="a-ads">A-ADS</option>
+                            <option value="coinzilla">Coinzilla</option>
+                            <option value="bitmedia">Bitmedia</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">优先级</label>
+                        <input type="number" name="priority" value="0"
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">广告代码</label>
+                    <textarea name="ad_code" required rows="5"
+                              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 font-mono text-sm"
+                              placeholder="粘贴广告代码..."></textarea>
+                </div>
+
+                <div class="flex items-center space-x-6">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="show_for_free" checked class="mr-2">
+                        <span class="text-sm text-gray-700">免费用户显示</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="show_for_pro" class="mr-2">
+                        <span class="text-sm text-gray-700">专业版显示</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="show_for_enterprise" class="mr-2">
+                        <span class="text-sm text-gray-700">企业版显示</span>
+                    </label>
+                </div>
+
+                <button type="submit"
+                        class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition">
+                    添加广告位
+                </button>
+            </form>
+        </div>
+
+        <!-- 广告统计 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">广告统计（最近30天）</h2>
+            <div id="ads-stats" class="space-y-2">
+                <!-- 动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://piexplorer-api.vercel.app';
+
+        // 加载广告位列表
+        async function loadAdsList() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/ads?action=list`);
+                const data = await response.json();
+
+                if (data.success && data.placements) {
+                    const container = document.getElementById('ads-list');
+                    container.innerHTML = data.placements.map(ad => `
+                        <div class="border rounded-lg p-4">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-gray-800">${ad.name}</h3>
+                                    <p class="text-sm text-gray-600">ID: ${ad.placement_id}</p>
+                                    <p class="text-sm text-gray-600">页面: ${ad.page} | 位置: ${ad.position}</p>
+                                    <p class="text-sm text-gray-600">平台: ${ad.platform || 'a-ads'}</p>
+                                    <div class="mt-2 flex items-center space-x-2">
+                                        ${ad.show_for_free ? '<span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">免费</span>' : ''}
+                                        ${ad.show_for_pro ? '<span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">专业版</span>' : ''}
+                                        ${ad.show_for_enterprise ? '<span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">企业版</span>' : ''}
+                                        <span class="px-2 py-1 ${ad.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'} text-xs rounded">
+                                            ${ad.status === 'active' ? '活跃' : '停用'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="toggleAdStatus('${ad.placement_id}', '${ad.status}')"
+                                            class="px-3 py-1 text-sm ${ad.status === 'active' ? 'bg-yellow-500' : 'bg-green-500'} text-white rounded hover:opacity-80">
+                                        ${ad.status === 'active' ? '停用' : '启用'}
+                                    </button>
+                                    <button onclick="deleteAd('${ad.placement_id}')"
+                                            class="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600">
+                                        删除
+                                    </button>
+                                </div>
+                            </div>
+                            <details class="mt-2">
+                                <summary class="cursor-pointer text-sm text-gray-600">查看广告代码</summary>
+                                <pre class="mt-2 p-2 bg-gray-100 rounded text-xs overflow-x-auto">${ad.ad_code}</pre>
+                            </details>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Failed to load ads list:', error);
+            }
+        }
+
+        // 添加广告位
+        document.getElementById('add-ad-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                placement_id: formData.get('placement_id'),
+                name: formData.get('name'),
+                page: formData.get('page'),
+                position: formData.get('position'),
+                ad_code: formData.get('ad_code'),
+                platform: formData.get('platform'),
+                priority: parseInt(formData.get('priority')),
+                show_for_free: formData.get('show_for_free') === 'on',
+                show_for_pro: formData.get('show_for_pro') === 'on',
+                show_for_enterprise: formData.get('show_for_enterprise') === 'on'
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/ads?action=create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ 广告位添加成功！');
+                    e.target.reset();
+                    loadAdsList();
+                } else {
+                    alert('❌ 添加失败: ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ 添加失败: ' + error.message);
+            }
+        });
+
+        // 切换广告状态
+        async function toggleAdStatus(placementId, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/ads?action=update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ placement_id: placementId, status: newStatus })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ 状态更新成功！');
+                    loadAdsList();
+                } else {
+                    alert('❌ 更新失败: ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ 更新失败: ' + error.message);
+            }
+        }
+
+        // 删除广告位
+        async function deleteAd(placementId) {
+            if (!confirm('确定要删除这个广告位吗？')) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/ads?action=delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ placement_id: placementId })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ 删除成功！');
+                    loadAdsList();
+                } else {
+                    alert('❌ 删除失败: ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ 删除失败: ' + error.message);
+            }
+        }
+
+        // 加载广告统计
+        async function loadAdsStats() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/ads?action=stats&days=30`);
+                const data = await response.json();
+
+                if (data.success && data.stats) {
+                    const container = document.getElementById('ads-stats');
+                    if (data.stats.length === 0) {
+                        container.innerHTML = '<p class="text-gray-500">暂无统计数据</p>';
+                    } else {
+                        container.innerHTML = data.stats.map(stat => `
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                                <span class="font-medium">${stat.placement_id}</span>
+                                <div class="text-sm text-gray-600">
+                                    展示: ${stat.impressions} | 独立用户: ${stat.unique_users} | 活跃天数: ${stat.active_days}
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load ads stats:', error);
+            }
+        }
+
+        // 页面加载
+        loadAdsList();
+        loadAdsStats();
+    </script>
+</body>
+</html>
+

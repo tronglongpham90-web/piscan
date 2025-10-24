@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支付取消 - PiExplorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .cancel-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            background: #ffc107;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .cancel-icon svg {
+            width: 60px;
+            height: 60px;
+            stroke: white;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .order-info {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .order-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .order-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-info-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .order-info-value {
+            color: #333;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9ff;
+        }
+
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 30px;
+            text-align: left;
+            border-radius: 5px;
+        }
+
+        .note-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .note-content {
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="cancel-icon">
+            <svg viewBox="0 0 52 52">
+                <path d="M16 16l20 20M36 16l-20 20"/>
+            </svg>
+        </div>
+
+        <h1>支付已取消</h1>
+
+        <p class="message">
+            您已取消本次支付。如果您改变主意，可以随时重新订阅。
+        </p>
+
+        <div class="order-info" id="orderInfo" style="display: none;">
+            <div class="order-info-item">
+                <span class="order-info-label">订单号</span>
+                <span class="order-info-value" id="orderNo">-</span>
+            </div>
+            <div class="order-info-item">
+                <span class="order-info-label">订单状态</span>
+                <span class="order-info-value">已取消</span>
+            </div>
+        </div>
+
+        <div class="note">
+            <div class="note-title">💡 为什么选择 PiExplorer？</div>
+            <div class="note-content">
+                • 实时监控 Pi Network 钱包余额变化<br>
+                • 自定义阈值，精准提醒<br>
+                • 多渠道通知（邮件、Telegram）<br>
+                • 历史数据查询，趋势分析<br>
+                • 安全可靠，隐私保护
+            </div>
+        </div>
+
+        <div class="buttons">
+            <a href="/monitor/payment.html?plan=premium&duration=12" class="btn btn-primary">重新订阅</a>
+            <a href="/monitor/" class="btn btn-secondary">返回首页</a>
+        </div>
+    </div>
+
+    <script>
+        // 从 URL 获取订单号
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderNo = urlParams.get('order');
+
+        if (orderNo) {
+            document.getElementById('orderNo').textContent = orderNo;
+            document.getElementById('orderInfo').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
